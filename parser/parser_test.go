@@ -23,35 +23,35 @@ func checkParserErrors(t *testing.T, p *Parser) {
 	t.FailNow()
 }
 func TestLetStatements(t *testing.T) {
-	input := `
-let x = 5;
-let y = 10;
-let foobar = 838383;
-`
-	l := lexer.New(input)
-	p := New(l)
-
-	program := p.ParseProgram()
-	checkParserErrors(t, p) // Check if there are any parser errors
-	if program == nil {
-		t.Fatalf("ParseProgram() returned nil")
-	}
-	if len(program.Statements) != 3 {
-		t.Fatalf("program.Statements does not contain 3 statements. Got %d", len(program.Statements))
-	}
-
 	tests := []struct {
+		input              string
 		expectedIdentifier string
+		expectedValue      interface{}
 	}{
-		{"x"},
-		{"y"},
-		{"foobar"},
+		{"let x = 5;", "x", 5},             // let x = 5;
+		{"let y = true;", "y", true},       // let y = true;
+		{"let foobar = y;", "foobar", "y"}, // let foobar = y;
 	}
 
-	// Loop through the tests and check if the identifier is correct
-	for i, tt := range tests {
-		stmt := program.Statements[i] // Get the statement
-		if !testLetStatement(t, stmt, tt.expectedIdentifier) {
+	// Loop through the tests and check if the let statements are correct
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+		program := p.ParseProgram()
+		checkParserErrors(t, p) // Check if there are any parser errors
+
+		// Check if the program contains 1 statement
+		if len(program.Statements) != 1 {
+			t.Fatalf("program.Statements does not contain 1 statement. Got %d", len(program.Statements))
+		}
+
+		stmt := program.Statements[0]                          // Get the statement
+		if !testLetStatement(t, stmt, tt.expectedIdentifier) { // Check if the statement is a let statement
+			return
+		}
+
+		val := stmt.(*ast.LetStatement).Value                 // Get the value
+		if !testLiteralExpression(t, val, tt.expectedValue) { // Check if the value is correct
 			return
 		}
 	}
@@ -89,33 +89,60 @@ func testLetStatement(t *testing.T, s ast.Statement, name string) bool {
 
 // TestReturnStatements is a function that tests return statements
 func TestReturnStatements(t *testing.T) {
-	input := `
-return 5;
-return 10;
-return 993322;
-`
-	l := lexer.New(input)
-	p := New(l)
-
-	program := p.ParseProgram()
-	checkParserErrors(t, p) // Check if there are any parser errors
-
-	// Check if the program contains 3 statements
-	if len(program.Statements) != 3 {
-		t.Fatalf("program.Statements does not contain 3 statements. Got %d", len(program.Statements))
+	tests := []struct {
+		input         string
+		expectedValue interface{}
+	}{
+		{"return 5;", 5},             // return 5;
+		{"return true;", true},       // return true;
+		{"return foobar;", "foobar"}, // return foobar;
 	}
 
-	// Loop through the statements and check if they are return statements
-	for _, stmt := range program.Statements {
-		returnStmt, ok := stmt.(*ast.ReturnStatement) // Type assertion to get the *ast.ReturnStatement
-		if !ok {
-			t.Errorf("stmt not *ast.ReturnStatement. Got %T", stmt)
-			continue
+	// Loop through the tests and check if the return statements are correct
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+		program := p.ParseProgram()
+		checkParserErrors(t, p) // Check if there are any parser errors
+
+		// Check if the program contains 1 statement
+		if len(program.Statements) != 1 {
+			t.Fatalf("program.Statements does not contain 1 statement. Got %d", len(program.Statements))
 		}
-		if returnStmt.TokenLiteral() != "return" { // Check if the token literal is correct
-			t.Errorf("returnStmt.TokenLiteral not 'return', Got %q", returnStmt.TokenLiteral())
+
+		stmt := program.Statements[0]      // Get the statement
+		if !testReturnStatement(t, stmt) { // Check if the statement is a return statement
+			return
+		}
+		val := stmt.(*ast.ReturnStatement).ReturnValue        // Get the value
+		if !testLiteralExpression(t, val, tt.expectedValue) { // Check if the value is correct
+			return
 		}
 	}
+}
+
+// testReturnStatement is a helper function that checks if the statement is a return statement
+func testReturnStatement(t *testing.T, s ast.Statement) bool {
+	// Check if the statement is a return statement
+	if s.TokenLiteral() != "return" {
+		t.Errorf("s.TokenLiteral not 'return'. Got %q", s.TokenLiteral())
+		return false
+	}
+
+	// Type assertion to get the *ast.ReturnStatement
+	returnStmt, ok := s.(*ast.ReturnStatement)
+	if !ok {
+		t.Errorf("s not *ast.ReturnStatement. Got %T", s)
+		return false
+	}
+
+	// Check literal expression
+	if returnStmt.TokenLiteral() != "return" {
+		t.Errorf("returnStmt.TokenLiteral() not 'return', Got %q", returnStmt.TokenLiteral())
+		return false
+	}
+
+	return true
 }
 
 func TestIdentifierExpression(t *testing.T) {
