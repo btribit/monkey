@@ -32,6 +32,11 @@ func Eval(node ast.Node) object.Object {
 	case *ast.PrefixExpression:
 		right := Eval(node.Right)
 		return evalPrefixExpression(node.Operator, right)
+
+	case *ast.InfixExpression:
+		left := Eval(node.Left)
+		right := Eval(node.Right)
+		return evalInfixExpression(node.Operator, left, right)
 	}
 
 	return nil
@@ -64,10 +69,65 @@ func evalPrefixExpression(operator string, right object.Object) object.Object {
 	switch operator {
 	case "!":
 		return evalBangOperatorExpression(right)
+	case "-":
+		return evalMinusPrefixOperatorExpression(right)
 
 	default:
 		return NULL
 	}
+}
+
+// evalInfixExpression is a helper function that takes in an operator and two
+// objects and evaluates the infix expression
+func evalInfixExpression(operator string, left, right object.Object) object.Object {
+	switch {
+	// Integer expressions
+	case left.Type() == object.INTEGER_OBJ && right.Type() == object.INTEGER_OBJ:
+		return evalIntegerInfixExpression(operator, left, right)
+	default:
+		return NULL
+	}
+}
+
+// evalIntegerInfixExpression is a helper function that takes in an operator and
+// two objects and evaluates the infix expression
+func evalIntegerInfixExpression(operator string, left, right object.Object) object.Object {
+	// Get the values from the objects
+	leftVal := left.(*object.Integer).Value
+	rightVal := right.(*object.Integer).Value
+
+	// Perform the operation
+	switch operator {
+	case "+":
+		return &object.Integer{Value: leftVal + rightVal}
+
+	case "-":
+		return &object.Integer{Value: leftVal - rightVal}
+
+	case "*":
+		return &object.Integer{Value: leftVal * rightVal}
+
+	case "/":
+		return &object.Integer{Value: leftVal / rightVal}
+
+	default:
+		return NULL
+	}
+}
+
+// evalMinusPrefixOperatorExpression is a helper function that takes in an object
+// and evaluates the minus prefix operator expression
+func evalMinusPrefixOperatorExpression(right object.Object) object.Object {
+	// Check if the object is an integer
+	if right.Type() != object.INTEGER_OBJ {
+		return NULL
+	}
+
+	// Get the value from the object
+	value := right.(*object.Integer).Value
+
+	// Perform the operation
+	return &object.Integer{Value: -value}
 }
 
 // evalBangOperatorExpression is a helper function that takes in an object and
