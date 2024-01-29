@@ -151,6 +151,37 @@ func TestReturnStatements(t *testing.T) {
 	}
 }
 
+// TestErrorHandling is a function that tests the evaluation of error handling
+func TestErrorHandling(t *testing.T) {
+	tests := []struct {
+		input       string
+		expectedMsg string
+	}{
+		// Error handling
+		{"5 + true;", "type mismatch: INTEGER + BOOLEAN"},
+		{"5 + true; 5;", "type mismatch: INTEGER + BOOLEAN"},
+		{"-true", "unknown operator: -BOOLEAN"},
+		{"true + false;", "unknown operator: BOOLEAN + BOOLEAN"},
+		{"5; true + false; 5", "unknown operator: BOOLEAN + BOOLEAN"},
+		{"if (10 > 1) { true + false; }", "unknown operator: BOOLEAN + BOOLEAN"},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		errObj, ok := evaluated.(*object.Error)
+		// Check if the evaluated object is an error
+		if !ok {
+			t.Errorf("no error object returned. got=%T (%+v)", evaluated, evaluated)
+			continue
+		}
+		// Check if the error message is correct
+		if errObj.Message != tt.expectedMsg {
+			t.Errorf("wrong error message. expected=%q, got=%q",
+				tt.expectedMsg, errObj.Message)
+		}
+	}
+}
+
 // testNullObject is a helper function that takes in a testing object and an
 // object. It tests whether the object is NULL.
 func testNullObject(t *testing.T, obj object.Object) bool {
