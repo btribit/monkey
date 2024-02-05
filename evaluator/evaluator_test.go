@@ -165,6 +165,7 @@ func TestErrorHandling(t *testing.T) {
 		{"5; true + false; 5", "unknown operator: BOOLEAN + BOOLEAN"},
 		{"if (10 > 1) { true + false; }", "unknown operator: BOOLEAN + BOOLEAN"},
 		{"foobar", "identifier not found: foobar"},
+		{"\"Hello\" - \"World\"", "unknown operator: STRING - STRING"},
 	}
 
 	for _, tt := range tests {
@@ -262,6 +263,22 @@ func TestClosures(t *testing.T) {
 // TestStringLiteral is a function that tests the evaluation of string literals
 func TestStringLiteral(t *testing.T) {
 	input := `"Hello World!"`
+	evaluated := testEval(input)
+	str, ok := evaluated.(*object.String)
+	if !ok {
+		t.Fatalf("object is not String. got=%T (%+v)", evaluated, evaluated)
+	}
+
+	if str.Value != "Hello World!" {
+		t.Errorf("String has wrong value. got=%q", str.Value)
+	}
+}
+
+// TestStringConcatenation is a function that tests the evaluation of string
+// concatenation
+func TestStringConcatenation(t *testing.T) {
+	input := `"Hello" + " " + "World!"`
+
 	evaluated := testEval(input)
 	str, ok := evaluated.(*object.String)
 	if !ok {

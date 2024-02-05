@@ -268,6 +268,25 @@ func evalInfixExpression(operator string, left, right object.Object) object.Obje
 		return nativeBoolToBooleanObject(left != right)
 	case left.Type() != right.Type():
 		return newError("type mismatch: %s %s %s", left.Type(), operator, right.Type())
+	case left.Type() == object.STRING_OBJ && right.Type() == object.STRING_OBJ:
+		return evalStringInfixExpression(operator, left, right)
+	default:
+		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
+	}
+}
+
+// evalStringInfixExpression is a helper function that takes in an operator and
+// two objects and evaluates the infix expression
+func evalStringInfixExpression(operator string, left, right object.Object) object.Object {
+	// Get the values from the objects
+	leftVal := left.(*object.String).Value
+	rightVal := right.(*object.String).Value
+
+	// Perform the operation
+	switch operator {
+	case "+":
+		return &object.String{Value: leftVal + rightVal}
+
 	default:
 		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
 	}
