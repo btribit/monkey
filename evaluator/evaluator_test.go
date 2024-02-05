@@ -259,6 +259,20 @@ func TestClosures(t *testing.T) {
 	testIntegerObject(t, testEval(input), 4)
 }
 
+// TestStringLiteral is a function that tests the evaluation of string literals
+func TestStringLiteral(t *testing.T) {
+	input := `"Hello World!"`
+	evaluated := testEval(input)
+	str, ok := evaluated.(*object.String)
+	if !ok {
+		t.Fatalf("object is not String. got=%T (%+v)", evaluated, evaluated)
+	}
+
+	if str.Value != "Hello World!" {
+		t.Errorf("String has wrong value. got=%q", str.Value)
+	}
+}
+
 // testNullObject is a helper function that takes in a testing object and an
 // object. It tests whether the object is NULL.
 func testNullObject(t *testing.T, obj object.Object) bool {
