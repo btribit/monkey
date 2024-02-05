@@ -165,22 +165,6 @@ func isTruthy(obj object.Object) bool {
 	}
 }
 
-// evalStatements is a helper function that takes in a slice of statements and
-// evaluates each statement in the slice
-func evalStatements(stmts []ast.Statement, env *object.Environment) object.Object {
-	var result object.Object
-
-	for _, statement := range stmts {
-		result = Eval(statement, env)
-
-		if returnValue, ok := result.(*object.ReturnValue); ok {
-			return returnValue.Value
-		}
-	}
-
-	return result
-}
-
 // nativeBoolToBooleanObject is a helper function that takes in a boolean and
 // returns a pointer to a Boolean object
 func nativeBoolToBooleanObject(input bool) *object.Boolean {
