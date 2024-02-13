@@ -29,6 +29,8 @@ const (
 	PREFIX
 	// CALL is the precedence of the call sign
 	CALL
+	// INDEX is the precedence of the index sign
+	INDEX
 )
 
 var precedences = map[token.TokenType]int{
@@ -41,6 +43,7 @@ var precedences = map[token.TokenType]int{
 	token.SLASH:    PRODUCT,
 	token.ASTERISK: PRODUCT,
 	token.LPAREN:   CALL,
+	token.LBRACKET: INDEX,
 }
 
 // Parser is a struct that holds the lexer and the currentToken
@@ -73,6 +76,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.IF, p.parseIfExpression)            // Register the parseIfExpression function
 	p.registerPrefix(token.FUNCTION, p.parseFunctionLiteral)   // Register the parseFunctionLiteral function
 	p.registerPrefix(token.STRING, p.parseStringLiteral)       // Register the parseStringLiteral function
+	p.registerPrefix(token.LBRACKET, p.parseArrayLiteral)      // Register the parseArrayLiteral function
 
 	p.infixParseFns = make(map[token.TokenType]infixParseFn) // Initialize the infixParseFns
 	p.registerInfix(token.PLUS, p.parseInfixExpression)      // Register the parseInfixExpression function
@@ -84,12 +88,65 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.LT, p.parseInfixExpression)        // Register the parseInfixExpression function
 	p.registerInfix(token.GT, p.parseInfixExpression)        // Register the parseInfixExpression function
 	p.registerInfix(token.LPAREN, p.parseCallExpression)     // Register the parseCallExpression function
+	p.registerInfix(token.LBRACKET, p.parseIndexExpression)  // Register the parseIndexExpression function
 
 	// Read two tokens so currentToken and peekToken are both set
 	p.nextToken()
 	p.nextToken()
 
 	return p
+}
+
+func (p *Parser) parseIndexExpression(left ast.Expression) ast.Expression {
+	expression := &ast.IndexExpression{Token: p.currentToken, Left: left}
+
+	p.nextToken()
+
+	expression.Index = p.parseExpression(LOWEST)
+
+	if !p.expectPeek(token.RBRACKET) {
+		return nil
+	}
+
+	return expression
+}
+
+// parseArrayLiteral is a helper function that parses an array literal
+func (p *Parser) parseArrayLiteral() ast.Expression {
+	array := &ast.ArrayLiteral{Token: p.currentToken} // Create a new array literal
+
+	array.Elements = p.parseExpressionList(token.RBRACKET) // Parse the expression list
+
+	return array
+}
+
+// parseExpressionList is a helper function that parses an expression list
+func (p *Parser) parseExpressionList(end token.TokenType) []ast.Expression {
+	list := []ast.Expression{} // Initialize the list
+
+	// Check if the next token is a right bracket
+	if p.peekTokenIs(end) {
+		p.nextToken() // Advance the current token
+		return list
+	}
+
+	p.nextToken() // Advance the current token
+
+	list = append(list, p.parseExpression(LOWEST)) // Parse the expression
+
+	// Loop through all the expressions
+	for p.peekTokenIs(token.COMMA) {
+		p.nextToken()                                  // Advance the current token
+		p.nextToken()                                  // Advance the current token
+		list = append(list, p.parseExpression(LOWEST)) // Parse the expression
+	}
+
+	// Check if the next token is a right bracket
+	if !p.expectPeek(end) {
+		return nil
+	}
+
+	return list
 }
 
 // parseStringLiteral is a helper function that parses a string literal

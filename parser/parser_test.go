@@ -333,6 +333,8 @@ func TestOperatorPrecedenceParsing(t *testing.T) {
 		{"a + add(b * c) + d", "((a + add((b * c))) + d)"},                       // a + add(b * c) + d
 		{"add(a, b, 1, 2 * 3, 4 + 5, add(6, 7 * 8))", "add(a, b, 1, (2 * 3), (4 + 5), add(6, (7 * 8)))"}, // add(a, b, 1, 2 * 3, 4 + 5, add(6, 7 * 8))
 		{"add(a + b + c * d / f + g)", "add((((a + b) + ((c * d) / f)) + g))"},                           // add(a + b + c * d / f + g)
+		{"a * [1, 2, 3, 4][b * c] * d", "((a * ([1, 2, 3, 4][(b * c)])) * d)"},                           // a * [1, 2, 3, 4][b * c] * d
+		{"add(a * b[2], b[1], 2 * [1, 2][1])", "add((a * (b[2])), (b[1]), (2 * ([1, 2][1])))"},           // add(a * b[2], b[1], 2 * [1, 2][1])
 	}
 
 	// Loop through the tests and check if the infix expression is correct
@@ -741,5 +743,83 @@ func TestStringLiteralExpression(t *testing.T) {
 	// Check if the value is correct
 	if literal.Value != "hello world" {
 		t.Errorf("literal.Value not %q. Got %q", "hello world", literal.Value)
+	}
+}
+
+// Test Array Literal Parsing
+func TestArrayLiteralParsing(t *testing.T) {
+	input := "[1, 2 * 2, 3 + 3];"
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p) // Check if there are any parser errors
+
+	// Check if the program contains 1 statement
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Statements does not contain 1 statement. Got %d", len(program.Statements))
+	}
+
+	// Type assertion to get the *ast.ExpressionStatement
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not *ast.ExpressionStatement. Got %T", program.Statements[0])
+	}
+
+	// Type assertion to get the *ast.ArrayLiteral
+	array, ok := stmt.Expression.(*ast.ArrayLiteral)
+	if !ok {
+		t.Fatalf("stmt.Expression is not *ast.ArrayLiteral. Got %T", stmt.Expression)
+	}
+
+	// Check if the length of elements is correct
+	if len(array.Elements) != 3 {
+		t.Fatalf("len(array.Elements) not 3. Got %d", len(array.Elements))
+	}
+
+	// Check if the first element is correct
+	testIntegerLiteral(t, array.Elements[0], 1)
+
+	// Check if the second element is correct
+	testInfixExpression(t, array.Elements[1], 2, "*", 2)
+
+	// Check if the third element is correct
+	testInfixExpression(t, array.Elements[2], 3, "+", 3)
+}
+
+// Test Index Expression Parsing
+func TestIndexExpressionParsing(t *testing.T) {
+	input := "myArray[1 + 1];"
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p) // Check if there are any parser errors
+
+	// Check if the program contains 1 statement
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Statements does not contain 1 statement. Got %d", len(program.Statements))
+	}
+
+	// Type assertion to get the *ast.ExpressionStatement
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not *ast.ExpressionStatement. Got %T", program.Statements[0])
+	}
+
+	// Type assertion to get the *ast.IndexExpression
+	indexExp, ok := stmt.Expression.(*ast.IndexExpression)
+	if !ok {
+		t.Fatalf("stmt.Expression is not *ast.IndexExpression. Got %T", stmt.Expression)
+	}
+
+	// Check if the left expression is correct
+	if !testIdentifier(t, indexExp.Left, "myArray") {
+		return
+	}
+
+	// Check if the index is correct
+	if !testInfixExpression(t, indexExp.Index, 1, "+", 1) {
+		return
 	}
 }
