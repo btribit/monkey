@@ -77,6 +77,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.FUNCTION, p.parseFunctionLiteral)   // Register the parseFunctionLiteral function
 	p.registerPrefix(token.STRING, p.parseStringLiteral)       // Register the parseStringLiteral function
 	p.registerPrefix(token.LBRACKET, p.parseArrayLiteral)      // Register the parseArrayLiteral function
+	p.registerPrefix(token.LBRACE, p.parseHashLiteral)         // Register the parseHashLiteral function
 
 	p.infixParseFns = make(map[token.TokenType]infixParseFn) // Initialize the infixParseFns
 	p.registerInfix(token.PLUS, p.parseInfixExpression)      // Register the parseInfixExpression function
@@ -95,6 +96,40 @@ func New(l *lexer.Lexer) *Parser {
 	p.nextToken()
 
 	return p
+}
+
+// parseHashLiteral is a helper function that parses a hash literal
+func (p *Parser) parseHashLiteral() ast.Expression {
+	hash := &ast.HashLiteral{Token: p.currentToken}      // Create a new hash literal
+	hash.Pairs = make(map[ast.Expression]ast.Expression) // Initialize the pairs
+
+	// Loop through all the key-value pairs
+	for !p.peekTokenIs(token.RBRACE) {
+		p.nextToken()                    // Advance the current token
+		key := p.parseExpression(LOWEST) // Parse the key
+
+		// Check if the next token is a colon
+		if !p.expectPeek(token.COLON) {
+			return nil
+		}
+
+		p.nextToken()                      // Advance the current token
+		value := p.parseExpression(LOWEST) // Parse the value
+
+		hash.Pairs[key] = value // Set the key-value pair
+
+		// Check if the next token is a comma
+		if !p.peekTokenIs(token.RBRACE) && !p.expectPeek(token.COMMA) {
+			return nil
+		}
+	}
+
+	// Check if the next token is a right brace
+	if !p.expectPeek(token.RBRACE) {
+		return nil
+	}
+
+	return hash
 }
 
 func (p *Parser) parseIndexExpression(left ast.Expression) ast.Expression {
