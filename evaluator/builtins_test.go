@@ -5,6 +5,40 @@ import (
 	"testing"
 )
 
+// testIncorrectParamCount tests for built-in functions with incorrect parameter counts
+func TestIncorrectParamCount(t *testing.T) {
+	tests := []struct {
+		input          string
+		expectedError  bool
+		expectedErrMsg string
+	}{
+		{`len("hello", "world")`, true, "wrong number of arguments. got=2, want=1"},
+		{`first([1, 2, 3], "extra")`, true, "wrong number of arguments. got=2, want=1"},
+		{`last([], "extra", "extra")`, true, "wrong number of arguments. got=3, want=1"},
+		{`rest()`, true, "wrong number of arguments. got=0, want=1"},
+		{`push([1, 2, 3], 4, 5)`, true, "wrong number of arguments. got=3, want=2"},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+
+		if !tt.expectedError {
+			t.Errorf("expected no error, got %T", evaluated)
+			continue
+		}
+
+		errObj, ok := evaluated.(*object.Error)
+		if !ok {
+			t.Errorf("expected error object, got %T", evaluated)
+			continue
+		}
+
+		if errObj.Message != tt.expectedErrMsg {
+			t.Errorf("expected error message %q, got %q", tt.expectedErrMsg, errObj.Message)
+		}
+	}
+}
+
 func TestBuiltins(t *testing.T) {
 	tests := []struct {
 		input          string
