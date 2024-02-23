@@ -12,10 +12,17 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	// Read a command line argument for compiler or evaluator
+	if len(os.Args) > 1 && os.Args[1] == "compiler" {
+		fmt.Printf("You are using the Monkey compiler\n")
+		repl.StartCompiler(os.Stdin, os.Stdout)
+		return
+	}
+
 	fmt.Printf("Hello %s! This is the Monkey programming language!\n",
 		user.Username)
 	fmt.Printf("Feel free to type in commands\n")
-	repl.Start(os.Stdin, os.Stdout)
+	repl.StartEvaluator(os.Stdin, os.Stdout)
 }
 
 // Output:
