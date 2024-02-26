@@ -80,6 +80,11 @@ func (c *compiler) addConstant(obj object.Object) int {
 // emit appends the given instructions to the compiler's instruction stream
 func (c *compiler) emit(op code.Opcode, operands ...int) int {
 	instruction := code.Make(op, operands...)
+	def, err := code.Lookup(instruction[0])
+	if err != nil {
+		return c.addInstruction(instruction)
+	}
+	fmt.Printf("emit %s\n", def.Name)
 	position := c.addInstruction(instruction)
 	return position
 }
