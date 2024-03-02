@@ -9,21 +9,60 @@ import (
 	"monkey/object"
 )
 
+type EmittedInstruction struct {
+	Opcode   code.Opcode
+	Position int
+}
+
 type compiler struct {
 	instructions code.Instructions
 	constants    []object.Object
+
+	lastInstruction EmittedInstruction
+	prevInstruction EmittedInstruction
 }
 
 func New() *compiler {
 	return &compiler{
-		instructions: code.Instructions{},
-		constants:    []object.Object{},
+		instructions:    code.Instructions{},
+		constants:       []object.Object{},
+		lastInstruction: EmittedInstruction{},
+		prevInstruction: EmittedInstruction{},
 	}
 }
 
 func (c *compiler) Compile(node ast.Node) error {
 	switch node := node.(type) {
 	case *ast.Program:
+		for _, s := range node.Statements {
+			err := c.Compile(s)
+			if err != nil {
+				return err
+			}
+		}
+
+	case *ast.IfExpression:
+		err := c.Compile(node.Condition)
+		if err != nil {
+			return err
+		}
+
+		// emit an OpJumpNotTruthy with a bogus value
+		jumpNotTruthyPos := c.emit(code.OpJumpNotTruthy, 9999)
+
+		err = c.Compile(node.Consequence)
+		if err != nil {
+			return err
+		}
+
+		if c.lastInstructionIsPop() {
+			c.removeLastPop()
+		}
+
+		afterConsequencePos := len(c.instructions)
+		c.changeOperand(jumpNotTruthyPos, afterConsequencePos)
+
+	case *ast.BlockStatement:
 		for _, s := range node.Statements {
 			err := c.Compile(s)
 			if err != nil {
@@ -114,6 +153,31 @@ func (c *compiler) Compile(node ast.Node) error {
 	return nil
 }
 
+// replaceInstruction replaces the instruction at the given position with the given instructions
+func (c *compiler) replaceInstruction(pos int, newInstruction []byte) {
+	for i := 0; i < len(newInstruction); i++ {
+		c.instructions[pos+i] = newInstruction[i]
+	}
+}
+
+// changeOperand changes the operand of the instruction at the given position
+func (c *compiler) changeOperand(opPos int, operand int) {
+	opcode := code.Opcode(c.instructions[opPos])
+	newInstruction := code.Make(opcode, operand)
+	c.replaceInstruction(opPos, newInstruction)
+}
+
+// lastInstructionIsPop returns true if the last instruction is a pop
+func (c *compiler) lastInstructionIsPop() bool {
+	return c.lastInstruction.Opcode == code.OpPop
+}
+
+// removeLastPop removes the last pop instruction
+func (c *compiler) removeLastPop() {
+	c.instructions = c.instructions[:c.lastInstruction.Position]
+	c.lastInstruction = c.prevInstruction
+}
+
 // addConstant adds a constant to the compiler's constant pool and returns its position
 func (c *compiler) addConstant(obj object.Object) int {
 	c.constants = append(c.constants, obj)
@@ -123,13 +187,22 @@ func (c *compiler) addConstant(obj object.Object) int {
 // emit appends the given instructions to the compiler's instruction stream
 func (c *compiler) emit(op code.Opcode, operands ...int) int {
 	instruction := code.Make(op, operands...)
+	position := c.addInstruction(instruction)
+
 	def, err := code.Lookup(instruction[0])
 	if err != nil {
 		return c.addInstruction(instruction)
 	}
 	fmt.Printf("emit %s\n", def.Name)
-	position := c.addInstruction(instruction)
+
+	c.setLastInstruction(op, position)
 	return position
+}
+
+// setLastInstruction sets the last instruction and the previous instruction
+func (c *compiler) setLastInstruction(op code.Opcode, position int) {
+	c.prevInstruction = c.lastInstruction
+	c.lastInstruction = EmittedInstruction{Opcode: op, Position: position}
 }
 
 // addInstruction adds the given instructions to the compiler's instruction stream
