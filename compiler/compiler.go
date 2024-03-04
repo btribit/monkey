@@ -17,6 +17,7 @@ type EmittedInstruction struct {
 type compiler struct {
 	instructions code.Instructions
 	constants    []object.Object
+	symbolTable  *SymbolTable
 
 	lastInstruction EmittedInstruction
 	prevInstruction EmittedInstruction
@@ -26,9 +27,18 @@ func New() *compiler {
 	return &compiler{
 		instructions:    code.Instructions{},
 		constants:       []object.Object{},
+		symbolTable:     NewSymbolTable(),
 		lastInstruction: EmittedInstruction{},
 		prevInstruction: EmittedInstruction{},
 	}
+}
+
+// NewWithState creates a new compiler with the given symbol table and constants
+func NewWithState(symbolTable *SymbolTable, constants []object.Object) *compiler {
+	compiler := New()
+	compiler.symbolTable = symbolTable
+	compiler.constants = constants
+	return compiler
 }
 
 func (c *compiler) Compile(node ast.Node) error {
@@ -165,6 +175,22 @@ func (c *compiler) Compile(node ast.Node) error {
 		} else {
 			c.emit(code.OpFalse)
 		}
+
+	case *ast.LetStatement:
+		err := c.Compile(node.Value)
+		if err != nil {
+			return err
+		}
+		symbol := c.symbolTable.Define(node.Name.Value)
+		c.emit(code.OpSetGlobal, symbol.Index)
+
+	case *ast.Identifier:
+		symbol, ok := c.symbolTable.Resolve(node.Value)
+		if !ok {
+			return fmt.Errorf("undefined variable %s", node.Value)
+		}
+
+		c.emit(code.OpGetGlobal, symbol.Index)
 
 	}
 
