@@ -20,7 +20,7 @@ func StartEvaluator(in io.Reader, out io.Writer) {
 	env := object.NewEnvironment()
 
 	for {
-		fmt.Printf(PROMPT)
+		fmt.Print(PROMPT)
 		scanned := scanner.Scan() // scanned is a boolean
 		if !scanned {
 			return
@@ -54,7 +54,7 @@ func StartCompiler(in io.Reader, out io.Writer) {
 	symbolTable := compiler.NewSymbolTable()
 
 	for {
-		fmt.Printf(PROMPT)
+		fmt.Print(PROMPT)
 		scanned := scanner.Scan() // scanned is a boolean
 		if !scanned {
 			return

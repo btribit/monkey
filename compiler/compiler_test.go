@@ -24,6 +24,32 @@ func parse(input string) *ast.Program {
 	return p.ParseProgram()
 }
 
+// TestStringExpression is a function to test the string expression
+func TestStringExpression(t *testing.T) {
+	tests := []compilerTestCase{
+		{
+			input:             `"monkey"`,
+			expectedConstants: []interface{}{"monkey"},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.OpConstant, 0),
+				code.Make(code.OpPop),
+			},
+		},
+		{
+			input:             `"mon" + "key"`,
+			expectedConstants: []interface{}{"mon", "key"},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.OpConstant, 0),
+				code.Make(code.OpConstant, 1),
+				code.Make(code.OpAdd),
+				code.Make(code.OpPop),
+			},
+		},
+	}
+
+	runCompilerTests(t, tests)
+}
+
 // TestGlobalLetStatements is a function to test the global let statements
 func TestGlobalLetStatements(t *testing.T) {
 	tests := []compilerTestCase{
@@ -339,7 +365,27 @@ func testConstants(expected []interface{}, actual []object.Object) error {
 			if err != nil {
 				return err
 			}
+		case string:
+			err := testStringObject(constant, actual[i])
+			if err != nil {
+				return err
+			}
 		}
+
+	}
+
+	return nil
+}
+
+// testStringObject is a helper function to test the string object
+func testStringObject(expected string, actual object.Object) error {
+	result, ok := actual.(*object.String)
+	if !ok {
+		return fmt.Errorf("object is not String. got=%T", actual)
+	}
+
+	if result.Value != expected {
+		return fmt.Errorf("object has wrong value. got=%q, want=%q", result.Value, expected)
 	}
 
 	return nil
