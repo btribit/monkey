@@ -24,6 +24,50 @@ func parse(input string) *ast.Program {
 	return p.ParseProgram()
 }
 
+// TestHashLiterals is a function to test the hash literals
+func TestHashLiterals(t *testing.T) {
+	tests := []compilerTestCase{
+		{
+			input:             "{}",
+			expectedConstants: []interface{}{},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.OpHash, 0),
+				code.Make(code.OpPop),
+			},
+		},
+		{
+			input:             "{1: 2, 2: 3}",
+			expectedConstants: []interface{}{1, 2, 2, 3},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.OpConstant, 0),
+				code.Make(code.OpConstant, 1),
+				code.Make(code.OpConstant, 2),
+				code.Make(code.OpConstant, 3),
+				code.Make(code.OpHash, 4),
+				code.Make(code.OpPop),
+			},
+		},
+		{
+			input:             "{1: 2 + 3, 2: 3 * 4}",
+			expectedConstants: []interface{}{1, 2, 3, 2, 3, 4},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.OpConstant, 0),
+				code.Make(code.OpConstant, 1),
+				code.Make(code.OpConstant, 2),
+				code.Make(code.OpAdd),
+				code.Make(code.OpConstant, 3),
+				code.Make(code.OpConstant, 4),
+				code.Make(code.OpConstant, 5),
+				code.Make(code.OpMul),
+				code.Make(code.OpHash, 4),
+				code.Make(code.OpPop),
+			},
+		},
+	}
+
+	runCompilerTests(t, tests)
+}
+
 // TestArrayLiterals is a function to test the array literals
 func TestArrayLiterals(t *testing.T) {
 	tests := []compilerTestCase{
@@ -344,26 +388,30 @@ func TestIntegerArithmetic(t *testing.T) {
 func runCompilerTests(t *testing.T, tests []compilerTestCase) {
 	t.Helper()
 
+	testCaseNumber := 0
+
 	for _, tt := range tests {
+		testCaseNumber = testCaseNumber + 1
+
 		compiler := New()
 
 		program := parse(tt.input)
 
 		err := compiler.Compile(program)
 		if err != nil {
-			t.Fatalf("compiler error: %s", err)
+			t.Fatalf("compiler error[ %d ]: %s", testCaseNumber, err)
 		}
 
 		bytecode := compiler.Bytecode()
 
 		err = testInstructions(tt.expectedInstructions, bytecode.Instructions)
 		if err != nil {
-			t.Fatalf("testInstructions failed: %s", err)
+			t.Fatalf("testInstructions failed[ %d ]: %s", testCaseNumber, err)
 		}
 
 		err = testConstants(tt.expectedConstants, bytecode.Constants)
 		if err != nil {
-			t.Fatalf("testConstants failed: %s", err)
+			t.Fatalf("testConstants failed[ %d ]: %s", testCaseNumber, err)
 		}
 	}
 }
