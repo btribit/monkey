@@ -189,7 +189,7 @@ func (vm *VM) Run() error {
 				return err
 			}
 		case code.OpCall:
-			vm.currentFrame().ip += 1
+			vm.currentFrame().ip += 1 // not specifically called out in the book, but seems to fix an off by one error
 			fn, ok := vm.stack[vm.sp-1].(*object.CompiledFunction)
 			if !ok {
 				return fmt.Errorf("calling non-function")
