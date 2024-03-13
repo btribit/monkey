@@ -88,6 +88,9 @@ func StartCompiler(in io.Reader, out io.Writer) {
 		}
 
 		stackTop := machine.LastPoppedStackElem()
+		if stackTop == nil {
+			stackTop = vm.Null
+		}
 		io.WriteString(out, stackTop.Inspect())
 		io.WriteString(out, "\n")
 	}

@@ -58,9 +58,6 @@ func NewWithGlobalsStore(bytecode *compiler.Bytecode, s []object.Object) *VM {
 
 // StackTop
 func (vm *VM) StackTop() object.Object {
-	if vm.sp == 0 {
-		return nil
-	}
 	return vm.stack[vm.sp-1]
 }
 
