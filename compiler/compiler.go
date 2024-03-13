@@ -266,7 +266,7 @@ func (c *compiler) Compile(node ast.Node) error {
 		}
 
 		instructions := c.leaveScope()
-		fmt.Printf("instructions: %s\n", instructions.String())
+		// fmt.Printf("instructions: %s\n", instructions.String())
 
 		compiledFn := &object.CompiledFunction{Instructions: instructions}
 		c.emit(code.OpConstant, c.addConstant(compiledFn))
@@ -343,12 +343,12 @@ func (c *compiler) emit(op code.Opcode, operands ...int) int {
 	instruction := code.Make(op, operands...)
 	position := c.addInstruction(instruction)
 
-	def, err := code.Lookup(instruction[0])
+	_, err := code.Lookup(instruction[0])
 	if err != nil {
 		return c.addInstruction(instruction)
 	}
 
-	fmt.Printf("opcode: %s, operands: %v\n", def.Name, operands)
+	// fmt.Printf("opcode: %s, operands: %v\n", def.Name, operands)
 
 	c.setLastInstruction(op, position)
 	return position

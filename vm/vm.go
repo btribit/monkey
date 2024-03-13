@@ -82,8 +82,8 @@ func (vm *VM) Run() error {
 		ins = vm.currentFrame().Instructions()
 		op = code.Opcode(ins[ip])
 
-		fmt.Printf("ip: %d, ins length: %d\n", ip, len(ins))
-		fmt.Printf("instruction: %s\n", ins)
+		// fmt.Printf("ip: %d, ins length: %d\n", ip, len(ins))
+		// fmt.Printf("instruction: %s\n", ins)
 
 		switch op {
 		case code.OpConstant:
