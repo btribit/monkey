@@ -17,6 +17,83 @@ type vmTestCase struct {
 	expected interface{}
 }
 
+// TestFirstClassFunctions is a function to test the first class functions
+func TestFirstClassFunctions(t *testing.T) {
+	tests := []vmTestCase{
+		{
+			input:    `let returnsOne = fn() { 1; }; let returnsOneReturn = fn() { returnsOne; }; returnsOneReturn()();`,
+			expected: 1,
+		},
+	}
+
+	runVmTests(t, tests)
+}
+
+// TestFunctionsWithoutReturnValue is a function to test the functions without return value
+func TestFunctionsWithoutReturnValue(t *testing.T) {
+	tests := []vmTestCase{
+		{
+			input:    `let noReturn = fn() { }; noReturn();`,
+			expected: Null,
+		},
+		{
+			input:    `let noReturn = fn() { }; let noReturnTwo = fn() { noReturn(); }; noReturn(); noReturnTwo();`,
+			expected: Null,
+		},
+	}
+
+	runVmTests(t, tests)
+}
+
+// TestFunctionWithReturnValue is a function to test the function with return value
+func TestFunctionWithReturnValue(t *testing.T) {
+	tests := []vmTestCase{
+		{
+			input:    `let earlyexit = fn() { return 99; 100; }; earlyexit();`,
+			expected: 99,
+		},
+		{
+			input:    `let earlyexit = fn() { return 99; return 100; }; earlyexit();`,
+			expected: 99,
+		},
+	}
+
+	runVmTests(t, tests)
+}
+
+// TestFunctionWithoutParameters is a function to test the function without parameters
+func TestFunctionWithoutParameters(t *testing.T) {
+	tests := []vmTestCase{
+		{
+			input:    `let noArg = fn() { 24; }; noArg();`,
+			expected: 24,
+		},
+		{
+			input:    `let noArg = fn() { 5 + 10; }; let noArgReturn = noArg(); noArgReturn;`,
+			expected: 15,
+		},
+		{
+			input:    `let noArg = fn() { 5 + 10; }; noArg();`,
+			expected: 15,
+		},
+		{
+			input: `let one = fn() { 1; };
+					let two = fn() { 2; };
+					one() + two();`,
+			expected: 3,
+		},
+		{
+			input: `let a = fn() { 1; };
+					let b = fn() { a() + 1; };
+					let c = fn() { b() + 1; };
+					c();`,
+			expected: 3,
+		},
+	}
+
+	runVmTests(t, tests)
+}
+
 // TestIndexExpressions is a function to test the index expressions
 func TestIndexExpressions(t *testing.T) {
 	tests := []vmTestCase{
