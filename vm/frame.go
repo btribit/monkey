@@ -9,16 +9,19 @@ import (
 
 // Frame is a struct to hold the information about the frame
 type Frame struct {
-	fn *object.CompiledFunction
-	ip int
+	fn          *object.CompiledFunction
+	ip          int
+	basePointer int
 }
 
 // NewFrame is a function to create a new frame
-func NewFrame(fn *object.CompiledFunction) *Frame {
-	return &Frame{
-		fn: fn,
-		ip: -1,
+func NewFrame(fn *object.CompiledFunction, basePointer int) *Frame {
+	f := &Frame{
+		fn:          fn,
+		ip:          -1,
+		basePointer: basePointer,
 	}
+	return f
 }
 
 // Instructions is a function to return the instructions
