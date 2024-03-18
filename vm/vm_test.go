@@ -17,6 +17,52 @@ type vmTestCase struct {
 	expected interface{}
 }
 
+// TestCallingFunctionWithErrors
+func TestCallingFunctionWithErrors(t *testing.T) {
+	tests := []vmTestCase{
+		{
+			input: `fn() { 1; }(1);
+			`,
+			expected: "wrong number of arguments: want=0, got=1",
+		},
+		{
+			input: `fn(a) { a; }();
+			`,
+			expected: "wrong number of arguments: want=1, got=0",
+		},
+		{
+			input:    `fn(a, b) { a + b; }(1);`,
+			expected: "wrong number of arguments: want=2, got=1",
+		},
+		{
+			input:    `let x = 5; x();`,
+			expected: "calling non-function",
+		},
+	}
+
+	for i, tt := range tests {
+		program := parse(tt.input)
+
+		comp := compiler.New()
+		err := comp.Compile(program)
+		if err != nil {
+			t.Fatalf("compiler error: %s", err)
+		}
+
+		machine := New(comp.Bytecode())
+
+		err = machine.Run()
+		if err == nil {
+			t.Fatalf("test[%d] - expected error", i)
+		}
+
+		if err.Error() != tt.expected {
+			t.Fatalf("test[%d] - wrong error message. expected=%q, got=%q",
+				i, tt.expected, err.Error())
+		}
+	}
+}
+
 // TestCallingFunctionsWithArgumentsAndBindings is a function to test the calling functions with arguments and bindings
 func TestCallingFunctionsWithArgumentsAndBindings(t *testing.T) {
 	tests := []vmTestCase{
@@ -27,6 +73,23 @@ func TestCallingFunctionsWithArgumentsAndBindings(t *testing.T) {
 		{
 			input:    `let sum = fn(a, b) { a + b; }; sum(1, 2);`,
 			expected: 3,
+		},
+		{
+			input: `
+			let globalNum = 10;
+			
+			let sum  = fn(a, b) {
+				let c =  a + b;
+				c + globalNum;
+			};
+			
+			let outer = fn() {
+				sum(1, 2) + sum(3, 4) + globalNum;
+			};
+			
+			outer() + globalNum;
+			`,
+			expected: 50,
 		},
 	}
 
