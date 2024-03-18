@@ -74,7 +74,7 @@ func TestCallingFunctionsWithBindings(t *testing.T) {
 func TestFirstClassFunctions(t *testing.T) {
 	tests := []vmTestCase{
 		{
-			input:    `let returnsOne = fn() { 1; }; let returnsOneReturn = fn() { returnsOne; }; returnsOneReturn()();`,
+			input:    `let returnsOneReturner = fn() { let returnsOne = fn() { 1; }; returnsOne; }; returnsOneReturner()();`,
 			expected: 1,
 		},
 	}
