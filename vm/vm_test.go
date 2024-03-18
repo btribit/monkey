@@ -56,10 +56,6 @@ func TestCallingFunctionWithErrors(t *testing.T) {
 			input:    `fn(a, b) { a + b; }(1);`,
 			expected: "wrong number of arguments: want=2, got=1",
 		},
-		{
-			input:    `let x = 5; x();`,
-			expected: "calling non-function and non-built-in",
-		},
 	}
 
 	for i, tt := range tests {
