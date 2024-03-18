@@ -17,6 +17,22 @@ type vmTestCase struct {
 	expected interface{}
 }
 
+// TestCallingFunctionsWithArgumentsAndBindings is a function to test the calling functions with arguments and bindings
+func TestCallingFunctionsWithArgumentsAndBindings(t *testing.T) {
+	tests := []vmTestCase{
+		{
+			input:    `let identity = fn(a) { a; }; identity(4);`,
+			expected: 4,
+		},
+		{
+			input:    `let sum = fn(a, b) { a + b; }; sum(1, 2);`,
+			expected: 3,
+		},
+	}
+
+	runVmTests(t, tests)
+}
+
 // TestCallingFunctionsWithBindings is a function test function bindings
 func TestCallingFunctionsWithBindings(t *testing.T) {
 	tests := []vmTestCase{
