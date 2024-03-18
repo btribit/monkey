@@ -114,7 +114,7 @@ var Builtins = []struct {
 			arr := args[0].(*Array)
 			length := len(arr.Elements)
 
-			newElements := make([]Object, length+1, length+1)
+			newElements := make([]Object, length+1)
 			copy(newElements, arr.Elements)
 			newElements[length] = args[1]
 
