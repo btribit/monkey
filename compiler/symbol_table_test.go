@@ -6,6 +6,42 @@ import (
 	"testing"
 )
 
+// TestShadowingFunctionName is a test case for shadowing functions
+func TestShadowingFunctionName(t *testing.T) {
+	global := NewSymbolTable()
+	global.DefineFunctionName("a")
+	global.Define("a")
+
+	expected := Symbol{Name: "a", Scope: GlobalScope, Index: 0}
+
+	result, ok := global.Resolve(expected.Name)
+	if !ok {
+		t.Fatalf("function name %s not resolvable", expected.Name)
+	}
+
+	if result != expected {
+		t.Errorf("expected %s to resolve to %+v, got=%+v", expected.Name, expected, result)
+	}
+}
+
+// TestDefineAndResolveFunctionName is a test case for defining and resolving function names
+func TestDefineAndResolveFunctionName(t *testing.T) {
+	global := NewSymbolTable()
+	global.DefineFunctionName("a")
+
+	expected := Symbol{Name: "a", Scope: FunctionScope, Index: 0}
+
+	result, ok := global.Resolve(expected.Name)
+	if !ok {
+		t.Fatalf("function name %s not resolvable", expected.Name)
+	}
+
+	if result != expected {
+		t.Errorf("expected %+v, got=%+v", expected, result)
+	}
+
+}
+
 // TestResolveUnresolvableFree is a test case for ensuring that unresolvable free variables are handled correctly
 func TestResolveUnresolvableFree(t *testing.T) {
 	global := NewSymbolTable()
