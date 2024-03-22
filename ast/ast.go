@@ -248,6 +248,15 @@ func (ce *CallExpression) String() string {
 	return out.String()
 }
 
+type ImportLiteral struct {
+	Token token.Token // the 'import' token
+	Path  string
+}
+
+func (il *ImportLiteral) expressionNode()      {}
+func (il *ImportLiteral) TokenLiteral() string { return il.Token.Literal }
+func (il *ImportLiteral) String() string       { return il.Path }
+
 type FunctionLiteral struct {
 	Token      token.Token // The 'fn' token
 	Parameters []*Identifier

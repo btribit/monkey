@@ -949,3 +949,35 @@ func TestFunctionLiteralWithName(t *testing.T) {
 		t.Errorf("function literal name wrong. Want 'myFunction', Got=%q", function.Name)
 	}
 }
+
+// TestImportLiteral which is a test case to import "file.mky" as a module
+func TestImportLiteral(t *testing.T) {
+	input := `import "file.mky";`
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p) // Check if there are any parser errors
+
+	t.Logf("Program: %s", program.String())
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Statements does not contain %d statement. Got=%d", 1, len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not *ast.ExpressionStatement. Got=%T", program.Statements[0])
+	}
+
+	importStmt, ok := stmt.Expression.(*ast.ImportLiteral)
+	if !ok {
+		t.Fatalf("stmt.Expression is not *ast.ImportLiteral. Got=%T", stmt.Expression)
+	}
+
+	t.Log(importStmt)
+
+	if importStmt.Path != "file.mky" {
+		t.Errorf("import path wrong. Want 'file.mky', Got=%q", importStmt.Path)
+	}
+}

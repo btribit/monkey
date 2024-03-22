@@ -7,6 +7,22 @@ import (
 	"testing"
 )
 
+// TestEvalImportLiteral is a function that tests the evaluation of import
+// literals
+func TestEvalImportLiteral(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected int64
+	}{
+		// Import literals
+		{`import "../test.mky"; test(5);`, 5},
+	}
+
+	for _, tt := range tests {
+		testIntegerObject(t, testEval(tt.input), tt.expected)
+	}
+}
+
 func TestEvalIntegerExpression(t *testing.T) {
 	tests := []struct {
 		input    string

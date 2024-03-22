@@ -4,6 +4,7 @@ package object
 
 import (
 	"fmt"
+	"strings"
 )
 
 var Builtins = []struct {
@@ -112,13 +113,56 @@ var Builtins = []struct {
 			}
 
 			arr := args[0].(*Array)
+			arr.Elements = append(arr.Elements, args[1])
+
+			return arr
+		},
+		},
+	},
+	{
+		"pop",
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 1 {
+				return newError("wrong number of arguments. got=%d, want=1", len(args))
+			}
+			if args[0].Type() != ARRAY_OBJ {
+				return newError("argument to `pop` must be ARRAY, got %s", args[0].Type())
+			}
+
+			arr := args[0].(*Array)
 			length := len(arr.Elements)
+			if length > 0 {
+				lastElement := arr.Elements[length-1]
+				arr.Elements = arr.Elements[:length-1]
+				return lastElement
+			}
 
-			newElements := make([]Object, length+1)
-			copy(newElements, arr.Elements)
-			newElements[length] = args[1]
+			return nil
+		},
+		},
+	},
+	{
+		"join",
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 2 {
+				return newError("wrong number of arguments. got=%d, want=2", len(args))
+			}
+			if args[0].Type() != ARRAY_OBJ {
+				return newError("first argument to `join` must be ARRAY, got %s", args[0].Type())
+			}
+			if args[1].Type() != STRING_OBJ {
+				return newError("second argument to `join` must be STRING, got %s", args[1].Type())
+			}
 
-			return &Array{Elements: newElements}
+			arr := args[0].(*Array)
+			sep := args[1].(*String)
+
+			strs := make([]string, len(arr.Elements))
+			for i, obj := range arr.Elements {
+				strs[i] = obj.Inspect()
+			}
+
+			return &String{Value: strings.Join(strs, sep.Value)}
 		},
 		},
 	},

@@ -75,6 +75,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.LPAREN, p.parseGroupedExpression)   // Register the parseGroupedExpression function
 	p.registerPrefix(token.IF, p.parseIfExpression)            // Register the parseIfExpression function
 	p.registerPrefix(token.FUNCTION, p.parseFunctionLiteral)   // Register the parseFunctionLiteral function
+	p.registerPrefix(token.IMPORT, p.parseImportLiteral)       // Register the parseImportExpression function
 	p.registerPrefix(token.STRING, p.parseStringLiteral)       // Register the parseStringLiteral function
 	p.registerPrefix(token.LBRACKET, p.parseArrayLiteral)      // Register the parseArrayLiteral function
 	p.registerPrefix(token.LBRACE, p.parseHashLiteral)         // Register the parseHashLiteral function
@@ -96,6 +97,18 @@ func New(l *lexer.Lexer) *Parser {
 	p.nextToken()
 
 	return p
+}
+
+// parseImportLiteral is a helper function that parses an import literal
+func (p *Parser) parseImportLiteral() ast.Expression {
+	exp := &ast.ImportLiteral{Token: p.currentToken} // Create a new import literal
+
+	for !p.peekTokenIs(token.SEMICOLON) {
+		p.nextToken()
+		exp.Path = p.currentToken.Literal
+	}
+
+	return exp
 }
 
 // parseHashLiteral is a helper function that parses a hash literal

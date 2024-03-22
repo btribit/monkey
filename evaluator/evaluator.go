@@ -3,7 +3,10 @@ package evaluator
 import (
 	"fmt"
 	"monkey/ast"
+	"monkey/lexer"
 	"monkey/object"
+	"monkey/parser"
+	"os"
 )
 
 // Define constants for the Boolean object
@@ -110,10 +113,34 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		return evalIndexExpression(left, index)
 	case *ast.HashLiteral:
 		return evalHashLiteral(node, env)
-
+	case *ast.ImportLiteral:
+		return evalImportLiteral(node, env)
 	}
 
 	return nil
+}
+
+// evalImportLiteral is a helper function that takes in an import literal and an
+// environment and evaluates the import literal
+func evalImportLiteral(node *ast.ImportLiteral, env *object.Environment) object.Object {
+	// Read the file from the node.path into a string
+	fileContent, err := os.ReadFile(node.Path)
+	if err != nil {
+		return newError("error reading import file: %s", err.Error())
+	}
+
+	// convert fileContent to a string
+	fileContentString := string(fileContent)
+
+	l := lexer.New(fileContentString)
+	p := parser.New(l)
+	program := p.ParseProgram()
+	evaluated := Eval(program, env)
+	if evaluated != nil {
+		return evaluated
+	}
+
+	return NULL
 }
 
 // evalHashLiteral is a helper function that takes in a hash literal and an

@@ -85,6 +85,13 @@ type Error struct {
 func (e *Error) Inspect() string  { return "ERROR: " + e.Message }
 func (e *Error) Type() ObjectType { return ERROR_OBJ }
 
+type Import struct {
+	Path string
+}
+
+func (i *Import) Type() ObjectType { return STRING_OBJ }
+func (i *Import) Inspect() string  { return i.Path }
+
 type Function struct {
 	Parameters []*ast.Identifier
 	Body       *ast.BlockStatement
