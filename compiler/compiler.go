@@ -6,7 +6,10 @@ import (
 	"fmt"
 	"monkey/ast"
 	"monkey/code"
+	"monkey/lexer"
 	"monkey/object"
+	"monkey/parser"
+	"os"
 	"sort"
 )
 
@@ -315,6 +318,18 @@ func (c *compiler) Compile(node ast.Node) error {
 		}
 
 		c.emit(code.OpCall, len(node.Arguments))
+	case *ast.ImportLiteral:
+		content, err := os.ReadFile(node.Path)
+		if err != nil {
+			return err
+		}
+		l := lexer.New(string(content))
+		p := parser.New(l)
+
+		program := p.ParseProgram()
+		c.Compile(program)
+		c.emit(code.OpImport, c.addConstant(&object.String{Value: node.Path}))
+
 	}
 
 	return nil

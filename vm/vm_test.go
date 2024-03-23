@@ -17,6 +17,21 @@ type vmTestCase struct {
 	expected interface{}
 }
 
+// TestImportLiteral is a function to test the import literal
+func TestImportLiteral(t *testing.T) {
+	tests := []vmTestCase{
+		{
+			input: `
+			import "../test.mky";
+			test(5);
+			`,
+			expected: 5,
+		},
+	}
+
+	runVmTests(t, tests)
+}
+
 // TestRecursiveFunctions
 func TestRecursiveFunctions(t *testing.T) {
 	tests := []vmTestCase{

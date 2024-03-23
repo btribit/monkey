@@ -54,6 +54,7 @@ const (
 	OpClosure
 	OpGetFree
 	OpCurrentClosure
+	OpImport
 )
 
 var definitions = map[Opcode]*Definition{
@@ -87,6 +88,7 @@ var definitions = map[Opcode]*Definition{
 	OpClosure:        {"OpClosure", []int{2, 1}},
 	OpGetFree:        {"OpGetFree", []int{1}},
 	OpCurrentClosure: {"OpCurrentClosure", []int{}},
+	OpImport:         {"OpImport", []int{1}},
 }
 
 func Make(op Opcode, operands ...int) []byte {

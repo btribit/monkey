@@ -24,6 +24,38 @@ func parse(input string) *ast.Program {
 	return p.ParseProgram()
 }
 
+// TestImportLiteral to test importing a monkey module/file
+func TestImportLiteral(t *testing.T) {
+	tests := []compilerTestCase{
+		{
+			input: `
+			import "../test.mky";
+			test(5);
+			`,
+			expectedConstants: []interface{}{
+				[]code.Instructions{
+					code.Make(code.OpGetLocal, 0),
+					code.Make(code.OpReturnValue),
+				},
+				"../test.mky",
+				5,
+			},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.OpClosure, 0, 0),
+				code.Make(code.OpSetGlobal, 0),
+				code.Make(code.OpImport, 1),
+				code.Make(code.OpPop),
+				code.Make(code.OpGetGlobal, 0),
+				code.Make(code.OpConstant, 2),
+				code.Make(code.OpCall, 1),
+				code.Make(code.OpPop),
+			},
+		},
+	}
+
+	runCompilerTests(t, tests)
+}
+
 // TestRecursiveFunctions to test recursion and current closure at compile time
 func TestRecursiveFunctions(t *testing.T) {
 	tests := []compilerTestCase{

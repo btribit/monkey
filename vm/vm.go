@@ -264,6 +264,8 @@ func (vm *VM) Run() error {
 			if err != nil {
 				return err
 			}
+		case code.OpImport:
+			vm.currentFrame().ip += 2
 		}
 
 	}
