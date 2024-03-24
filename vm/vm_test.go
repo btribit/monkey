@@ -17,6 +17,21 @@ type vmTestCase struct {
 	expected interface{}
 }
 
+// TestFloatLiteral is a function to test the float literal bits
+func TestFloatLiteral(t *testing.T) {
+	tests := []vmTestCase{
+		{
+			input: `
+			let x = 5.2 + 10.1;
+			x;
+			`,
+			expected: 15.3,
+		},
+	}
+
+	runVmTests(t, tests)
+}
+
 // TestImportLiteral is a function to test the import literal
 func TestImportLiteral(t *testing.T) {
 	tests := []vmTestCase{
@@ -26,6 +41,13 @@ func TestImportLiteral(t *testing.T) {
 			test(5);
 			`,
 			expected: 5,
+		},
+		{
+			input: `
+			import "../test.mky";
+			test(5.2);
+			`,
+			expected: 5.2,
 		},
 	}
 

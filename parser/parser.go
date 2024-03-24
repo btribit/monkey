@@ -68,6 +68,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.prefixParseFns = make(map[token.TokenType]prefixParseFn) // Initialize the prefixParseFns
 	p.registerPrefix(token.IDENT, p.parseIdentifier)           // Register the parseIdentifier function
 	p.registerPrefix(token.INT, p.parseIntegerLiteral)         // Register the parseIntegerLiteral function
+	p.registerPrefix(token.FLOAT, p.parseFloatLiteral)         // Register the parseFloatLiteral function
 	p.registerPrefix(token.BANG, p.parsePrefixExpression)      // Register the parsePrefixExpression function
 	p.registerPrefix(token.MINUS, p.parsePrefixExpression)     // Register the parsePrefixExpression function
 	p.registerPrefix(token.TRUE, p.parseBoolean)               // Register the parseBoolean function
@@ -76,9 +77,10 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.IF, p.parseIfExpression)            // Register the parseIfExpression function
 	p.registerPrefix(token.FUNCTION, p.parseFunctionLiteral)   // Register the parseFunctionLiteral function
 	p.registerPrefix(token.IMPORT, p.parseImportLiteral)       // Register the parseImportExpression function
-	p.registerPrefix(token.STRING, p.parseStringLiteral)       // Register the parseStringLiteral function
-	p.registerPrefix(token.LBRACKET, p.parseArrayLiteral)      // Register the parseArrayLiteral function
-	p.registerPrefix(token.LBRACE, p.parseHashLiteral)         // Register the parseHashLiteral function
+	//	p.registerPrefix(token.TENSOR, p.parseTensorLiteral)       // Register the parseTensorLiteral function
+	p.registerPrefix(token.STRING, p.parseStringLiteral)  // Register the parseStringLiteral function
+	p.registerPrefix(token.LBRACKET, p.parseArrayLiteral) // Register the parseArrayLiteral function
+	p.registerPrefix(token.LBRACE, p.parseHashLiteral)    // Register the parseHashLiteral function
 
 	p.infixParseFns = make(map[token.TokenType]infixParseFn) // Initialize the infixParseFns
 	p.registerInfix(token.PLUS, p.parseInfixExpression)      // Register the parseInfixExpression function
@@ -98,6 +100,28 @@ func New(l *lexer.Lexer) *Parser {
 
 	return p
 }
+
+// parseFloatLiteral is a helpter function that parse a float literal
+func (p *Parser) parseFloatLiteral() ast.Expression {
+	value, err := strconv.ParseFloat(p.currentToken.Literal, 64) // Convert the literal to an float
+	if err != nil {
+		msg := fmt.Sprintf("could not parse %q as integer", p.currentToken.Literal)
+		p.errors = append(p.errors, msg) // Add an error to the errors slice
+		return nil
+	}
+
+	return &ast.FloatLiteral{Token: p.currentToken, Value: value}
+}
+
+/*
+// parseTensorLiteral is a helpter function that parses a tensor literal
+func (p *Parser) parseTensorLiteral() ast.Expression {
+	tensor := &ast.TensorLiteral{Token: p.currentToken} // Create a new tensor literal
+
+	tensor.Elements = p.parseExpressionList(token.RBRACKET) // Parse the expression list
+
+	return tensor
+}*/
 
 // parseImportLiteral is a helper function that parses an import literal
 func (p *Parser) parseImportLiteral() ast.Expression {

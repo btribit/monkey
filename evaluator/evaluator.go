@@ -30,6 +30,9 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 	case *ast.IntegerLiteral:
 		return &object.Integer{Value: node.Value}
 
+	case *ast.FloatLiteral:
+		return &object.Float{Value: node.Value}
+
 	case *ast.Boolean:
 		return nativeBoolToBooleanObject(node.Value)
 
@@ -388,6 +391,8 @@ func evalInfixExpression(operator string, left, right object.Object) object.Obje
 	// Integer expressions
 	case left.Type() == object.INTEGER_OBJ && right.Type() == object.INTEGER_OBJ:
 		return evalIntegerInfixExpression(operator, left, right)
+	case left.Type() == object.FLOAT_OBJ && right.Type() == object.FLOAT_OBJ:
+		return evalFloatInfixExpression(operator, left, right)
 	case operator == "==":
 		return nativeBoolToBooleanObject(left == right)
 	case operator == "!=":
@@ -456,12 +461,57 @@ func evalIntegerInfixExpression(operator string, left, right object.Object) obje
 	}
 }
 
+// evalFloatInfixExpression is a helper function that takes in an operator and
+// two objects and evaluates the infix expression
+// to copypasta or not to copypasta
+func evalFloatInfixExpression(operator string, left, right object.Object) object.Object {
+	// Get the values from the objects
+	leftVal := left.(*object.Float).Value
+	rightVal := right.(*object.Float).Value
+
+	// Perform the operation
+	switch operator {
+	case "+":
+		return &object.Float{Value: leftVal + rightVal}
+
+	case "-":
+		return &object.Float{Value: leftVal - rightVal}
+
+	case "*":
+		return &object.Float{Value: leftVal * rightVal}
+
+	case "/":
+		return &object.Float{Value: leftVal / rightVal}
+
+	case "<":
+		return nativeBoolToBooleanObject(leftVal < rightVal)
+
+	case ">":
+		return nativeBoolToBooleanObject(leftVal > rightVal)
+
+	case "==":
+		return nativeBoolToBooleanObject(leftVal == rightVal)
+
+	case "!=":
+		return nativeBoolToBooleanObject(leftVal != rightVal)
+
+	default:
+		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
+	}
+}
+
 // evalMinusPrefixOperatorExpression is a helper function that takes in an object
 // and evaluates the minus prefix operator expression
 func evalMinusPrefixOperatorExpression(right object.Object) object.Object {
 	// Check if the object is an integer
-	if right.Type() != object.INTEGER_OBJ {
+	if right.Type() != object.INTEGER_OBJ && right.Type() != object.FLOAT_OBJ {
 		return newError("unknown operator: -%s", right.Type())
+	}
+
+	if right.Type() == object.FLOAT_OBJ {
+		value := right.(*object.Float).Value
+
+		return &object.Float{Value: -value}
 	}
 
 	// Get the value from the object

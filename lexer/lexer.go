@@ -93,9 +93,7 @@ func (l *Lexer) NextToken() token.Token {
 			tok.Type = token.LookupIdent(tok.Literal) // LookupIdent is a helper function
 			return tok
 		} else if isDigit(l.ch) { // isDigit is a helper function
-			tok.Type = token.INT
-			tok.Literal = l.readNumber() // readNumber is a helper function
-			return tok
+			return l.readNumber() // readNumber is a helper function
 		} else {
 			tok = newToken(token.ILLEGAL, l.ch)
 		}
@@ -130,16 +128,26 @@ func (l *Lexer) skipWhitespace() { // skipWhitespace is a helper function
 	}
 }
 
-func (l *Lexer) readNumber() string { // readNumber is a helper function
+func (l *Lexer) readNumber() token.Token { // readNumber is a helper function
+	var tok token.Token
 	position := l.position
-	for isDigit(l.ch) { // isDigit is a helper function
+	tok.Type = token.INT
+	for isDigit(l.ch) || isDecimal(l.ch) { // isDigit is a helper function
+		if isDecimal(l.ch) {
+			tok.Type = token.FLOAT
+		}
 		l.readChar()
 	}
-	return l.input[position:l.position]
+	tok.Literal = l.input[position:l.position]
+	return tok
 }
 
 func isDigit(ch byte) bool { // isDigit is a helper function
 	return '0' <= ch && ch <= '9'
+}
+
+func isDecimal(ch byte) bool { // isDecimal point helper function
+	return ch == '.'
 }
 
 func isLetter(ch byte) bool { // isLetter is a helper function

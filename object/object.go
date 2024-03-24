@@ -13,6 +13,7 @@ type ObjectType string
 
 const (
 	INTEGER_OBJ           = "INTEGER"
+	FLOAT_OBJ             = "FLOAT"
 	BOOLEAN_OBJ           = "BOOLEAN"
 	STRING_OBJ            = "STRING"
 	NULL_OBJ              = "NULL"
@@ -25,6 +26,7 @@ const (
 	ARRAY_OBJ             = "ARRAY"
 	HASH_OBJ              = "HASH"
 	CLOSURE_OBJ           = "CLOSURE"
+	TENSOR_OBJ            = "TENSOR"
 )
 
 type Closure struct {
@@ -47,6 +49,13 @@ type Integer struct {
 
 func (i *Integer) Inspect() string  { return fmt.Sprintf("%d", i.Value) }
 func (i *Integer) Type() ObjectType { return INTEGER_OBJ }
+
+type Float struct {
+	Value float64
+}
+
+func (f *Float) Inspect() string  { return fmt.Sprintf("%f", f.Value) }
+func (f *Float) Type() ObjectType { return FLOAT_OBJ }
 
 // Boolean
 type Boolean struct {
@@ -126,6 +135,34 @@ type Builtin struct {
 
 func (b *Builtin) Type() ObjectType { return BUILTIN_OBJ }
 func (b *Builtin) Inspect() string  { return "builtin function" }
+
+/*
+// Tensor object
+type Tensor struct {
+	Shape []int
+	Data  []float64
+}
+
+func (t *Tensor) Type() ObjectType { return TENSOR_OBJ }
+func (t *Tensor) Inspect() string {
+	var out bytes.Buffer
+
+	// Print out the shape
+	shape := []string{}
+	for _, s := range t.Shape {
+		shape = append(shape, fmt.Sprintf("%d", s))
+	}
+
+	// Print out the data
+	data := []string{}
+	for _, d := range t.Data {
+		data = append(data, fmt.Sprintf("%f", d))
+	}
+
+
+
+	return fmt.Sprintf("Tensor{%s, %s}", strings.Join(shape, ", "), strings.Join(data, ", "))
+}*/
 
 type Array struct {
 	Elements []Object

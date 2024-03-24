@@ -981,3 +981,32 @@ func TestImportLiteral(t *testing.T) {
 		t.Errorf("import path wrong. Want 'file.mky', Got=%q", importStmt.Path)
 	}
 }
+
+func TestFloatLiteralExpression(t *testing.T) {
+	input := "5.12;"
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p) // Check if there are any parser errors
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program has not enough statements. Got %d", len(program.Statements))
+	}
+	// Type assertion to get the *ast.ExpressionStatement
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not *ast.ExpressionStatement. Got %T", program.Statements[0])
+	}
+	// Type assertion to get the *ast.IntegerLiteral
+	literal, ok := stmt.Expression.(*ast.FloatLiteral)
+	if !ok {
+		t.Fatalf("exp not *ast.FloatLiteral. Got %T", stmt.Expression)
+	}
+	if literal.Value != 5.12 { // Check if the value is correct
+		t.Errorf("literal.Value not %f. Got %f", 5.12, literal.Value)
+	}
+	if literal.TokenLiteral() != "5.12" { // Check if the token literal is correct
+		t.Errorf("literal.TokenLiteral not %s. Got %s", "5", literal.TokenLiteral())
+	}
+}
