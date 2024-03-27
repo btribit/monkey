@@ -302,30 +302,15 @@ func (sl *StringLiteral) expressionNode()      {}
 func (sl *StringLiteral) TokenLiteral() string { return sl.Token.Literal }
 func (sl *StringLiteral) String() string       { return sl.Token.Literal }
 
-/*
 type TensorLiteral struct {
-	Token    token.Token // The 'tensor' token
-	Elements [][]Expression
+	Token token.Token
+	Shape Expression
+	Data  Expression
 }
 
 func (tl *TensorLiteral) expressionNode()      {}
 func (tl *TensorLiteral) TokenLiteral() string { return tl.Token.Literal }
-func (tl *TensorLiteral) String() string {
-	var out bytes.Buffer
-
-	elements := []string{}
-
-	for _, el := range tl.Elements {
-		elements = append(elements, el.String())
-	}
-
-	out.WriteString("tensor")
-	out.WriteString("[")
-	out.WriteString(strings.Join(elements, ", "))
-	out.WriteString("]")
-
-	return out.String()
-}*/
+func (tl *TensorLiteral) String() string       { return tl.Token.Literal } // ToDo make this awesome
 
 type ArrayLiteral struct {
 	Token    token.Token // The '[' token

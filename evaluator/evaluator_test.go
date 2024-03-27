@@ -358,6 +358,18 @@ func TestBuiltinFunctions(t *testing.T) {
 	}
 }
 
+// TestTensorLiteral
+func TestTensorLiteral(t *testing.T) {
+	input := "tensor([3,3],[1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0]);"
+	evaluated := testEval(input)
+	t.Logf("%T", evaluated)
+	result, ok := evaluated.(*object.Tensor)
+	if !ok {
+		t.Fatalf("object is not a Tensor. got=%T (%+v)", evaluated, evaluated)
+	}
+	t.Fatalf("%+v", result.Shape)
+}
+
 // TestArrayLiterals is a function that tests the evaluation of array literals
 func TestArrayLiterals(t *testing.T) {
 	input := "[1, 2 * 2, 3 + 3]"

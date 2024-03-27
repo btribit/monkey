@@ -77,10 +77,10 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.IF, p.parseIfExpression)            // Register the parseIfExpression function
 	p.registerPrefix(token.FUNCTION, p.parseFunctionLiteral)   // Register the parseFunctionLiteral function
 	p.registerPrefix(token.IMPORT, p.parseImportLiteral)       // Register the parseImportExpression function
-	//	p.registerPrefix(token.TENSOR, p.parseTensorLiteral)       // Register the parseTensorLiteral function
-	p.registerPrefix(token.STRING, p.parseStringLiteral)  // Register the parseStringLiteral function
-	p.registerPrefix(token.LBRACKET, p.parseArrayLiteral) // Register the parseArrayLiteral function
-	p.registerPrefix(token.LBRACE, p.parseHashLiteral)    // Register the parseHashLiteral function
+	p.registerPrefix(token.TENSOR, p.parseTensorLiteral)       // Register the parseTensorLiteral function
+	p.registerPrefix(token.STRING, p.parseStringLiteral)       // Register the parseStringLiteral function
+	p.registerPrefix(token.LBRACKET, p.parseArrayLiteral)      // Register the parseArrayLiteral function
+	p.registerPrefix(token.LBRACE, p.parseHashLiteral)         // Register the parseHashLiteral function
 
 	p.infixParseFns = make(map[token.TokenType]infixParseFn) // Initialize the infixParseFns
 	p.registerInfix(token.PLUS, p.parseInfixExpression)      // Register the parseInfixExpression function
@@ -112,16 +112,6 @@ func (p *Parser) parseFloatLiteral() ast.Expression {
 
 	return &ast.FloatLiteral{Token: p.currentToken, Value: value}
 }
-
-/*
-// parseTensorLiteral is a helpter function that parses a tensor literal
-func (p *Parser) parseTensorLiteral() ast.Expression {
-	tensor := &ast.TensorLiteral{Token: p.currentToken} // Create a new tensor literal
-
-	tensor.Elements = p.parseExpressionList(token.RBRACKET) // Parse the expression list
-
-	return tensor
-}*/
 
 // parseImportLiteral is a helper function that parses an import literal
 func (p *Parser) parseImportLiteral() ast.Expression {
@@ -262,6 +252,44 @@ func (p *Parser) parseCallArguments() []ast.Expression {
 	}
 
 	return args
+}
+
+// parseTensorLiteral is a helper function that parses a tensor functionish literal.
+func (p *Parser) parseTensorLiteral() ast.Expression {
+	lit := &ast.TensorLiteral{Token: p.currentToken} // create a new Tensor literal
+
+	if !p.expectPeek(token.LPAREN) {
+		return nil
+	}
+	// Move to the shape list/array
+	p.nextToken()
+
+	// Parse the shape - assuming parseArrayLiteral can handle general list/array parsing
+	shape := p.parseArrayLiteral()
+	if shape == nil {
+		return nil
+	}
+	lit.Shape = shape
+
+	if !p.expectPeek(token.COMMA) {
+		return nil
+	}
+
+	// Move to the data list/array
+	p.nextToken()
+
+	// Parse the data - reusing the parseArrayLiteral assuming it can handle nested lists/arrays
+	data := p.parseArrayLiteral()
+	if data == nil {
+		return nil
+	}
+	lit.Data = data
+
+	if !p.expectPeek(token.RPAREN) {
+		return nil
+	}
+
+	return lit
 }
 
 // parseFunctionLiteral is a helper function that parses a function literal

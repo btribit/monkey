@@ -998,7 +998,7 @@ func TestFloatLiteralExpression(t *testing.T) {
 	if !ok {
 		t.Fatalf("program.Statements[0] is not *ast.ExpressionStatement. Got %T", program.Statements[0])
 	}
-	// Type assertion to get the *ast.IntegerLiteral
+	// Type assertion to get the *ast.FloatLiteral
 	literal, ok := stmt.Expression.(*ast.FloatLiteral)
 	if !ok {
 		t.Fatalf("exp not *ast.FloatLiteral. Got %T", stmt.Expression)
@@ -1009,4 +1009,31 @@ func TestFloatLiteralExpression(t *testing.T) {
 	if literal.TokenLiteral() != "5.12" { // Check if the token literal is correct
 		t.Errorf("literal.TokenLiteral not %s. Got %s", "5", literal.TokenLiteral())
 	}
+}
+
+// TestTensorLiteralExpression
+func TestTensorLiteralExpression(t *testing.T) {
+	input := "tensor([3,3],[1,2,3,4,5,6,7,8,9])"
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p) // Check if there are any parser errors
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program has not enough statements. Got %d", len(program.Statements))
+	}
+	// Type assertion to get the *ast.ExpressionStatement
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not *ast.ExpressionStatement. Got %T", program.Statements[0])
+	}
+	// Type assertion to get the *ast.TensorLiteral
+	_, ok = stmt.Expression.(*ast.TensorLiteral)
+	if !ok {
+		t.Fatalf("exp not *ast.TensorLiteral. Got %T", stmt.Expression)
+	}
+
+	// need more things to check
+
 }

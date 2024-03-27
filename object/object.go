@@ -136,10 +136,9 @@ type Builtin struct {
 func (b *Builtin) Type() ObjectType { return BUILTIN_OBJ }
 func (b *Builtin) Inspect() string  { return "builtin function" }
 
-/*
 // Tensor object
 type Tensor struct {
-	Shape []int
+	Shape []int64
 	Data  []float64
 }
 
@@ -159,10 +158,14 @@ func (t *Tensor) Inspect() string {
 		data = append(data, fmt.Sprintf("%f", d))
 	}
 
+	out.WriteString("tensor([")
+	out.WriteString(strings.Join(shape, ", "))
+	out.WriteString("], [")
+	out.WriteString(strings.Join(data, ", "))
+	out.WriteString("])")
 
-
-	return fmt.Sprintf("Tensor{%s, %s}", strings.Join(shape, ", "), strings.Join(data, ", "))
-}*/
+	return out.String()
+}
 
 type Array struct {
 	Elements []Object

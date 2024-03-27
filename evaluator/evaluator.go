@@ -98,11 +98,7 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		return &object.String{Value: node.Value}
 
 	case *ast.ArrayLiteral:
-		elements := evalExpressions(node.Elements, env)
-		if len(elements) == 1 && isError(elements[0]) {
-			return elements[0]
-		}
-		return &object.Array{Elements: elements}
+		return evalArrayLiteral(node, env)
 
 	case *ast.IndexExpression:
 		left := Eval(node.Left, env)
@@ -118,9 +114,40 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		return evalHashLiteral(node, env)
 	case *ast.ImportLiteral:
 		return evalImportLiteral(node, env)
+	case *ast.TensorLiteral:
+		return evalTensorLiteral(node, env)
 	}
 
 	return nil
+}
+
+// evalArrayLiteral is a helper function that takes in an array literal
+func evalArrayLiteral(node *ast.ArrayLiteral, env *object.Environment) object.Object {
+	elements := evalExpressions(node.Elements, env)
+	if len(elements) == 1 && isError(elements[0]) {
+		return elements[0]
+	}
+	return &object.Array{Elements: elements}
+}
+
+// evalTensorLiteral is a helpter function that takes in an tensor literal
+func evalTensorLiteral(node *ast.TensorLiteral, env *object.Environment) object.Object {
+	var dataElements []float64
+	var shapeElements []int64
+
+	data := Eval(node.Data, env).(*object.Array)
+
+	for _, element := range data.Elements {
+		dataElements = append(dataElements, element.(*object.Float).Value)
+	}
+
+	shape := Eval(node.Shape, env).(*object.Array)
+
+	for _, element := range shape.Elements {
+		shapeElements = append(shapeElements, element.(*object.Integer).Value)
+	}
+
+	return &object.Tensor{Data: dataElements, Shape: shapeElements}
 }
 
 // evalImportLiteral is a helper function that takes in an import literal and an
