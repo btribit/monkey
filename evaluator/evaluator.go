@@ -420,6 +420,8 @@ func evalInfixExpression(operator string, left, right object.Object) object.Obje
 		return evalIntegerInfixExpression(operator, left, right)
 	case left.Type() == object.FLOAT_OBJ && right.Type() == object.FLOAT_OBJ:
 		return evalFloatInfixExpression(operator, left, right)
+	case left.Type() == object.TENSOR_OBJ && right.Type() == object.TENSOR_OBJ:
+		return evalTensorInfixExpression(operator, left, right)
 	case operator == "==":
 		return nativeBoolToBooleanObject(left == right)
 	case operator == "!=":
@@ -482,6 +484,45 @@ func evalIntegerInfixExpression(operator string, left, right object.Object) obje
 
 	case "!=":
 		return nativeBoolToBooleanObject(leftVal != rightVal)
+
+	default:
+		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
+	}
+}
+
+// evalTensorInfixExpression is a helper function that takes in an operator, and two tensor objects
+// and returns a tensor object.
+func evalTensorInfixExpression(operator string, left, right object.Object) object.Object {
+	// Get the values from the objects
+	leftVal := left.(*object.Tensor)
+	rightVal := right.(*object.Tensor)
+
+	var resultData []float64
+
+	// Perform the operation
+	switch operator {
+	case "+":
+		for index := range leftVal.Data {
+			resultData = append(resultData, leftVal.Data[index]+rightVal.Data[index])
+		}
+		return &object.Tensor{Shape: leftVal.Shape, Data: resultData}
+	case "-":
+		for index := range leftVal.Data {
+			resultData = append(resultData, leftVal.Data[index]-rightVal.Data[index])
+		}
+		return &object.Tensor{Shape: leftVal.Shape, Data: resultData}
+
+	case "*":
+		for index := range leftVal.Data {
+			resultData = append(resultData, leftVal.Data[index]*rightVal.Data[index])
+		}
+		return &object.Tensor{Shape: leftVal.Shape, Data: resultData}
+
+	case "/":
+		for index := range leftVal.Data {
+			resultData = append(resultData, leftVal.Data[index]/rightVal.Data[index])
+		}
+		return &object.Tensor{Shape: leftVal.Shape, Data: resultData}
 
 	default:
 		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
