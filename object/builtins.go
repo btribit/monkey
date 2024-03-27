@@ -4,8 +4,15 @@ package object
 
 import (
 	"fmt"
+	"math/rand"
 	"strings"
+	"time"
 )
+
+func random() float64 {
+	rand.Seed(time.Now().UnixNano()) // Initialize the global random number generator
+	return rand.Float64()
+}
 
 var Builtins = []struct {
 	Name    string
@@ -163,6 +170,16 @@ var Builtins = []struct {
 			}
 
 			return &String{Value: strings.Join(strs, sep.Value)}
+		},
+		},
+	},
+	{
+		"random",
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) > 0 {
+				return newError("random() takes no arguments")
+			}
+			return &Float{Value: random()}
 		},
 		},
 	},
