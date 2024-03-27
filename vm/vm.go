@@ -266,10 +266,47 @@ func (vm *VM) Run() error {
 			}
 		case code.OpImport:
 			vm.currentFrame().ip += 2
+		case code.OpTensor:
+			vm.currentFrame().ip += 2
+			data := vm.pop()  // Expect this to be an array
+			shape := vm.pop() // Expect this to be an array
+
+			tensor, err := createTensor(shape, data) // A function to create the tensor
+			if err != nil {
+				return err
+			}
+			vm.push(tensor)
 		}
 
 	}
 	return nil
+}
+
+// createTensor
+func createTensor(shape object.Object, data object.Object) (object.Object, error) {
+	var dataElements []float64
+	var shapeElements []int64
+
+	shapeArray, ok := shape.(*object.Array)
+	if !ok {
+		return nil, fmt.Errorf("dimensions argument must be an array")
+	}
+
+	dataArray, ok := data.(*object.Array)
+	if !ok {
+		return nil, fmt.Errorf("data argument must be an array")
+	}
+
+	for _, element := range dataArray.Elements {
+		dataElements = append(dataElements, element.(*object.Float).Value)
+	}
+
+	for _, element := range shapeArray.Elements {
+		shapeElements = append(shapeElements, element.(*object.Integer).Value)
+	}
+
+	return &object.Tensor{Data: dataElements, Shape: shapeElements}, nil
+
 }
 
 // pushClosure

@@ -17,6 +17,21 @@ type vmTestCase struct {
 	expected interface{}
 }
 
+// TestTensorLiteral is a function to test the tensor literal bits
+func TestTensorLiteral(t *testing.T) {
+	tests := []vmTestCase{
+		{
+			input: `
+			let x = tensor([3],[1.0,2.0,3.0]);
+			x;
+			`,
+			expected: Null,
+		},
+	}
+
+	runVmTests(t, tests)
+}
+
 // TestFloatLiteral is a function to test the float literal bits
 func TestFloatLiteral(t *testing.T) {
 	tests := []vmTestCase{

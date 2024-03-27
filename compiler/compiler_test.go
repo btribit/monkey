@@ -24,6 +24,38 @@ func parse(input string) *ast.Program {
 	return p.ParseProgram()
 }
 
+// TestTensorLiteral
+func TestTensorLiteral(t *testing.T) {
+	tests := []compilerTestCase{
+		{
+			input: `
+			let x = tensor([3],[1.0,2.0,3.0]);
+			x;
+			`,
+			expectedConstants: []interface{}{
+				3,
+				1.0,
+				2.0,
+				3.0,
+			},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.OpConstant, 0),
+				code.Make(code.OpArray, 1),
+				code.Make(code.OpConstant, 1),
+				code.Make(code.OpConstant, 2),
+				code.Make(code.OpConstant, 3),
+				code.Make(code.OpArray, 3),
+				code.Make(code.OpTensor),
+				code.Make(code.OpSetGlobal, 0),
+				code.Make(code.OpGetGlobal, 0),
+				code.Make(code.OpPop),
+			},
+		},
+	}
+
+	runCompilerTests(t, tests)
+}
+
 // TestImportLiteral to test importing a monkey module/file
 func TestImportLiteral(t *testing.T) {
 	tests := []compilerTestCase{

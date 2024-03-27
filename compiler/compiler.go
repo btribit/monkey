@@ -333,6 +333,17 @@ func (c *compiler) Compile(node ast.Node) error {
 		program := p.ParseProgram()
 		c.Compile(program)
 		c.emit(code.OpImport, c.addConstant(&object.String{Value: node.Path}))
+	case *ast.TensorLiteral:
+		err := c.Compile(node.Shape)
+		if err != nil {
+			return err
+		}
+		err = c.Compile(node.Data)
+		if err != nil {
+			return err
+		}
+
+		c.emit(code.OpTensor)
 
 	}
 
