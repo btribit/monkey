@@ -84,17 +84,17 @@ func TestImportLiteral(t *testing.T) {
 	tests := []vmTestCase{
 		{
 			input: `
-			import "../test.mky";
-			test(5);
+			import "../helper.mky";
+			sigmoid(0.5);
 			`,
-			expected: 5,
+			expected: 0.5,
 		},
 		{
 			input: `
-			import "../test.mky";
-			test(5.2);
+			import "../helper.mky";
+			sigmoid(0.4);
 			`,
-			expected: 5.2,
+			expected: 0.4,
 		},
 	}
 

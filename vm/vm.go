@@ -474,12 +474,18 @@ func (vm *VM) executeBangOperator() error {
 // executeMinusOperator
 func (vm *VM) executeMinusOperator() error {
 	operand := vm.pop()
-	if operand.Type() != object.INTEGER_OBJ {
+
+	switch operand.Type() {
+	case object.INTEGER_OBJ:
+		value := operand.(*object.Integer).Value
+		return vm.push(&object.Integer{Value: -value})
+	case object.FLOAT_OBJ:
+		value := operand.(*object.Float).Value
+		return vm.push(&object.Float{Value: -value})
+	default:
 		return fmt.Errorf("unsupported type for negation: %s", operand.Type())
 	}
 
-	value := operand.(*object.Integer).Value
-	return vm.push(&object.Integer{Value: -value})
 }
 
 // executeComparison

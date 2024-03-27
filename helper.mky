@@ -5,3 +5,20 @@ let fillArray = fn(arr, size) {
         return fillArray(push(arr, random()), size - 1);
     }
 };
+
+let sigmoid = fn(x) {
+    return 1.0 / (1.0 + exp(-x));
+};
+
+let map = fn(arr, func) {
+    let iter = fn(arr, accumulated, func) {
+        if (len(arr) == 0) {
+            return accumulated;
+        } else {
+            let head = first(arr);
+            let tail = rest(arr);
+            return iter(tail, push(accumulated, func(head)), func);
+        }
+    };
+    return iter(arr, [], func);
+};

@@ -4,6 +4,7 @@ package object
 
 import (
 	"fmt"
+	"math"
 	"math/rand"
 	"strings"
 	"time"
@@ -180,6 +181,26 @@ var Builtins = []struct {
 				return newError("random() takes no arguments")
 			}
 			return &Float{Value: random()}
+		},
+		},
+	},
+	{
+		"exp",
+		&Builtin{Fn: func(args ...Object) Object {
+			if len(args) != 1 {
+				return newError("wrong number of arguments. exp() requires exactly one argument.")
+			}
+
+			// Check for the argument type
+			switch arg := args[0].(type) {
+			case *Float:
+				return &Float{Value: math.Exp(arg.Value)}
+			case *Integer:
+				return &Float{Value: math.Exp(float64(arg.Value))}
+			default:
+				return newError("argument to `exp` must be a number")
+			}
+
 		},
 		},
 	},
