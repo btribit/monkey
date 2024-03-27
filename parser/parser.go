@@ -265,7 +265,7 @@ func (p *Parser) parseTensorLiteral() ast.Expression {
 	p.nextToken()
 
 	// Parse the shape - assuming parseArrayLiteral can handle general list/array parsing
-	shape := p.parseArrayLiteral()
+	shape := p.parseExpression(LOWEST)
 	if shape == nil {
 		return nil
 	}
@@ -279,7 +279,7 @@ func (p *Parser) parseTensorLiteral() ast.Expression {
 	p.nextToken()
 
 	// Parse the data - reusing the parseArrayLiteral assuming it can handle nested lists/arrays
-	data := p.parseArrayLiteral()
+	data := p.parseExpression(LOWEST)
 	if data == nil {
 		return nil
 	}

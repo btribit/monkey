@@ -1,0 +1,7 @@
+let fillArray = fn(arr, size) {
+    if (size == 0) {
+        return arr;
+    } else {
+        return fillArray(push(arr, random()), size - 1);
+    }
+};
