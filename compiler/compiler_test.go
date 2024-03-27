@@ -917,6 +917,39 @@ func TestBooleanExpressions(t *testing.T) {
 	runCompilerTests(t, tests)
 }
 
+// TestTensorArithmetic is a  function to test the tensor math functions
+func TestTensorArithmetic(t *testing.T) {
+	tests := []compilerTestCase{
+		{
+			input: "let x = tensor([1],[5.0]) - tensor([1],[4.0]); x;",
+			expectedConstants: []interface{}{
+				1,
+				5.0,
+				1,
+				4.0,
+			},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.OpConstant, 0),
+				code.Make(code.OpArray, 1),
+				code.Make(code.OpConstant, 1),
+				code.Make(code.OpArray, 1),
+				code.Make(code.OpTensor),
+				code.Make(code.OpConstant, 2),
+				code.Make(code.OpArray, 1),
+				code.Make(code.OpConstant, 3),
+				code.Make(code.OpArray, 1),
+				code.Make(code.OpTensor),
+				code.Make(code.OpSub),
+				code.Make(code.OpSetGlobal, 0),
+				code.Make(code.OpGetGlobal, 0),
+				code.Make(code.OpPop),
+			},
+		},
+	}
+
+	runCompilerTests(t, tests)
+}
+
 // TestIntegerArithmetic is a function to test the integer arithmetic
 func TestIntegerArithmetic(t *testing.T) {
 	tests := []compilerTestCase{

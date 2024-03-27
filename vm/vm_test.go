@@ -17,6 +17,38 @@ type vmTestCase struct {
 	expected interface{}
 }
 
+// TestTensorMath is a function to test the tensor math bits
+func TestTensorMath(t *testing.T) {
+	tests := []vmTestCase{
+		{
+			input: `
+			let x = tensor([1], [5.0]) - tensor([1], [4.0]);
+			x;`,
+			expected: object.Tensor{Shape: []int64{1}, Data: []float64{1.0}},
+		},
+		{
+			input: `
+			let x = tensor([1], [5.0]) + tensor([1], [4.0]);
+			x;`,
+			expected: object.Tensor{Shape: []int64{1}, Data: []float64{9.0}},
+		},
+		{
+			input: `
+			let x = tensor([1], [5.0]) * tensor([1], [4.0]);
+			x;`,
+			expected: object.Tensor{Shape: []int64{1}, Data: []float64{20.0}},
+		},
+		{
+			input: `
+			let x = tensor([1], [5.0]) / tensor([1], [2.5]);
+			x;`,
+			expected: object.Tensor{Shape: []int64{1}, Data: []float64{2.0}},
+		},
+	}
+
+	runVmTests(t, tests)
+}
+
 // TestTensorLiteral is a function to test the tensor literal bits
 func TestTensorLiteral(t *testing.T) {
 	tests := []vmTestCase{
@@ -606,6 +638,8 @@ func runVmTests(t *testing.T, tests []vmTestCase) {
 				fmt.Printf(" Instructions:\n%s", constant.Instructions)
 			case *object.Integer:
 				fmt.Printf(" Value: %d\n", constant.Value)
+			case *object.Tensor:
+				fmt.Printf(" Value: %+v\n", constant)
 			}
 			fmt.Printf("\n")
 		}
@@ -672,6 +706,11 @@ func testExpectedObject(t *testing.T, expected interface{}, actual object.Object
 		if err != nil {
 			t.Errorf("testStringObject failed: %s", err)
 		}
+	case object.Tensor:
+		err := testTensorObject(expected, actual)
+		if err != nil {
+			t.Errorf("testTensorObject failed: %+v", err)
+		}
 	case *object.Error:
 		errObj, ok := actual.(*object.Error)
 		if !ok {
@@ -682,6 +721,22 @@ func testExpectedObject(t *testing.T, expected interface{}, actual object.Object
 			t.Errorf("wrong error message. expected=%q, got=%q", expected.Message, errObj.Message)
 		}
 	}
+}
+
+func testTensorObject(expected object.Tensor, actual object.Object) error {
+	_, ok := actual.(*object.Tensor)
+	if !ok {
+		return fmt.Errorf("object is not a Tensor. got=%T", actual)
+	}
+
+	if !shapesEqual(expected.Shape, actual.(*object.Tensor).Shape) {
+		return fmt.Errorf("shapes have wrong value got=%+v, want=%+v", actual.(*object.Tensor).Shape, expected.Shape)
+	}
+
+	if !dataEqual(expected.Data, actual.(*object.Tensor).Data) {
+		return fmt.Errorf("data has wrong value. got=%+v, want=%+v", actual.(*object.Tensor).Data, expected.Data)
+	}
+	return nil
 }
 
 func testStringObject(expected string, actual object.Object) error {

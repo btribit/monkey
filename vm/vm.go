@@ -542,11 +542,75 @@ func (vm *VM) executeBinaryOperation(op code.Opcode) error {
 		return vm.executeBinaryIntegerOperation(op, left, right)
 	case leftType == object.FLOAT_OBJ && rightType == object.FLOAT_OBJ:
 		return vm.executeBinaryFloatOperation(op, left, right)
+	case leftType == object.TENSOR_OBJ && rightType == object.TENSOR_OBJ:
+		return vm.executeBinaryTensorOperation(op, left, right)
 	case leftType == object.STRING_OBJ && rightType == object.STRING_OBJ:
 		return vm.executeBinaryStringOperation(op, left, right)
 	default:
 		return fmt.Errorf("unsupported types for binary operation: %s %s", leftType, rightType)
 	}
+}
+
+// shapesEqual is a helper function to quickly compare shapes
+func shapesEqual(shape1, shape2 []int64) bool {
+	if len(shape1) != len(shape2) {
+		return false
+	}
+	for i, val := range shape1 {
+		if val != shape2[i] {
+			return false
+		}
+	}
+	return true
+}
+
+// shapesEqual is a helper function to quickly compare shapes
+func dataEqual(data1, data2 []float64) bool {
+	if len(data1) != len(data2) {
+		return false
+	}
+	for i, val := range data1 {
+		if val != data2[i] {
+			return false
+		}
+	}
+	return true
+}
+
+// executeBinaryTensorOperation
+func (vm *VM) executeBinaryTensorOperation(op code.Opcode, left, right object.Object) error {
+	leftShape := left.(*object.Tensor).Shape
+	rightShape := right.(*object.Tensor).Shape
+
+	if !shapesEqual(leftShape, rightShape) {
+		return fmt.Errorf("shapes are not equal %+v %+v", leftShape, rightShape)
+	}
+
+	var resultData []float64
+
+	switch op {
+	case code.OpAdd:
+		for index := range left.(*object.Tensor).Data {
+			resultData = append(resultData, left.(*object.Tensor).Data[index]+right.(*object.Tensor).Data[index])
+		}
+	case code.OpSub:
+		for index := range left.(*object.Tensor).Data {
+			resultData = append(resultData, left.(*object.Tensor).Data[index]-right.(*object.Tensor).Data[index])
+		}
+	case code.OpMul:
+		for index := range left.(*object.Tensor).Data {
+			resultData = append(resultData, left.(*object.Tensor).Data[index]*right.(*object.Tensor).Data[index])
+		}
+	case code.OpDiv:
+		for index := range left.(*object.Tensor).Data {
+			resultData = append(resultData, left.(*object.Tensor).Data[index]/right.(*object.Tensor).Data[index])
+		}
+	default:
+		return fmt.Errorf("unknown integer operator: %d", op)
+	}
+
+	return vm.push(&object.Tensor{Shape: left.(*object.Tensor).Shape, Data: resultData})
+
 }
 
 // executeBinaryStringOperation
