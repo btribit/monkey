@@ -490,6 +490,32 @@ func evalIntegerInfixExpression(operator string, left, right object.Object) obje
 	}
 }
 
+// shapesEqual is a helper function to quickly compare shapes
+func shapesEqual(shape1, shape2 []int64) bool {
+	if len(shape1) != len(shape2) {
+		return false
+	}
+	for i, val := range shape1 {
+		if val != shape2[i] {
+			return false
+		}
+	}
+	return true
+}
+
+// shapesEqual is a helper function to quickly compare shapes
+func dataEqual(data1, data2 []float64) bool {
+	if len(data1) != len(data2) {
+		return false
+	}
+	for i, val := range data1 {
+		if val != data2[i] {
+			return false
+		}
+	}
+	return true
+}
+
 // evalTensorInfixExpression is a helper function that takes in an operator, and two tensor objects
 // and returns a tensor object.
 func evalTensorInfixExpression(operator string, left, right object.Object) object.Object {
@@ -498,6 +524,10 @@ func evalTensorInfixExpression(operator string, left, right object.Object) objec
 	rightVal := right.(*object.Tensor)
 
 	var resultData []float64
+
+	if !shapesEqual(leftVal.Shape, rightVal.Shape) {
+		return newError("tensors operations are not using the same shape %+v %+v", leftVal.Shape, rightVal.Shape)
+	}
 
 	// Perform the operation
 	switch operator {

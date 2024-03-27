@@ -459,6 +459,41 @@ func TestHashLiterals(t *testing.T) {
 	}
 }
 
+// TestTensorMath is a function that tests the evaluation of Tensor objects
+func TestTensorMath(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{
+			input:    `let a = tensor([3],[1.0,2.0,3.0]); let b = tensor([3],[1.0,2.0,3.0]); let c = a + b; c;`,
+			expected: object.Tensor{Shape: []int64{3}, Data: []float64{2.0, 4.0, 6.0}},
+		},
+		{
+			input:    `let d = tensor([3],[1.0,2.0,3.0]); let e = tensor([3],[1.0,2.0,3.0]); let f = d - e; f;`,
+			expected: object.Tensor{Shape: []int64{3}, Data: []float64{0.0, 0.0, 0.0}},
+		},
+		{
+			input:    `let x = tensor([3],[1.0,2.0,3.0]); let y = tensor([3],[1.0,4.0,9.0]); let z = x * y; z;`,
+			expected: object.Tensor{Shape: []int64{3}, Data: []float64{1.0, 8.0, 27.0}},
+		},
+		{
+			input:    `let x = tensor([3],[1.0,2.0,3.0]); let y = tensor([3],[1.0,1.0,1.0]); let z = x / y; z;`,
+			expected: object.Tensor{Shape: []int64{3}, Data: []float64{1.0, 2.0, 3.0}},
+		},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		switch expected := tt.expected.(type) {
+		case object.Tensor:
+			testTensorObject(t, evaluated, expected)
+		case nil:
+			testNullObject(t, evaluated)
+		}
+	}
+}
+
 // TestHashIndexExpressions is a function that tests the evaluation of hash index
 // expressions
 func TestHashIndexExpressions(t *testing.T) {
@@ -506,6 +541,27 @@ func testEval(input string) object.Object {
 	env := object.NewEnvironment()
 
 	return Eval(program, env)
+}
+
+// func testTensorObject is a helper function that takes in a testing object, an object, and a tensor.
+// It tests where the object is a tensor and whether the tensor is equal to the expected tensor
+func testTensorObject(t *testing.T, obj object.Object, expected object.Tensor) bool {
+	result, ok := obj.(*object.Tensor)
+	if !ok {
+		t.Errorf("object is not a tensor. got=%T (%+v)", obj, obj)
+		return false
+	}
+
+	if !shapesEqual(result.Shape, expected.Shape) {
+		t.Errorf("object has wrong shape value. got=%+v, want %+v", result.Shape, expected.Shape)
+	}
+
+	if !dataEqual(result.Data, expected.Data) {
+		t.Errorf("object has wrong shape value. got=%+v, want %+v", result.Data, expected.Data)
+
+	}
+
+	return true
 }
 
 // testIntegerObject is a helper function that takes in a testing object, an
