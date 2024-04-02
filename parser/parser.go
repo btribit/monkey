@@ -105,7 +105,7 @@ func New(l *lexer.Lexer) *Parser {
 func (p *Parser) parseFloatLiteral() ast.Expression {
 	value, err := strconv.ParseFloat(p.currentToken.Literal, 64) // Convert the literal to an float
 	if err != nil {
-		msg := fmt.Sprintf("could not parse %q as integer", p.currentToken.Literal)
+		msg := fmt.Sprintf("Syntax error on line %d: could not parse %q as float", p.currentToken.Line, p.currentToken.Literal)
 		p.errors = append(p.errors, msg) // Add an error to the errors slice
 		return nil
 	}
@@ -577,7 +577,7 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 }
 
 func (p *Parser) noPrefixParseFnError(t token.TokenType) {
-	msg := fmt.Sprintf("no prefix parse function for %s found", t)
+	msg := fmt.Sprintf("On line %d, no prefix parse function for %s found", p.currentToken.Line, t)
 	p.errors = append(p.errors, msg) // Add an error to the errors slice
 }
 
@@ -587,7 +587,7 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 
 	value, err := strconv.ParseInt(p.currentToken.Literal, 0, 64) // Convert the literal to an integer
 	if err != nil {
-		msg := fmt.Sprintf("could not parse %q as integer", p.currentToken.Literal)
+		msg := fmt.Sprintf("Syntax error on line %d: could not parse %q as integer", p.currentToken.Line, p.currentToken.Literal)
 		p.errors = append(p.errors, msg) // Add an error to the errors slice
 		return nil
 	}
@@ -632,7 +632,7 @@ func (p *Parser) Errors() []string {
 
 // peekError is a helper function that adds an error to the errors slice
 func (p *Parser) peekError(t token.TokenType) {
-	msg := fmt.Sprintf("expected next token to be %s, got %s instead", t, p.peekToken.Type)
+	msg := fmt.Sprintf("On line %d, expected next token to be %s, got %s instead", p.currentToken.Line, t, p.peekToken.Type)
 	p.errors = append(p.errors, msg)
 }
 

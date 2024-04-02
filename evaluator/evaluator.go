@@ -135,9 +135,12 @@ func evalTensorLiteral(node *ast.TensorLiteral, env *object.Environment) object.
 	var dataElements []float64
 	var shapeElements []int64
 
-	data := Eval(node.Data, env).(*object.Array)
+	data := Eval(node.Data, env)
+	if isError(data) {
+		return data
+	}
 
-	for _, element := range data.Elements {
+	for _, element := range data.(*object.Array).Elements {
 		dataElements = append(dataElements, element.(*object.Float).Value)
 	}
 
@@ -156,7 +159,7 @@ func evalImportLiteral(node *ast.ImportLiteral, env *object.Environment) object.
 	// Read the file from the node.path into a string
 	fileContent, err := os.ReadFile(node.Path)
 	if err != nil {
-		return newError("error reading import file: %s", err.Error())
+		return newError("On line %d, error reading import file: %s", node.Token.Line, err.Error())
 	}
 
 	// convert fileContent to a string
@@ -186,7 +189,7 @@ func evalHashLiteral(node *ast.HashLiteral, env *object.Environment) object.Obje
 
 		hashKey, ok := key.(object.Hashable)
 		if !ok {
-			return newError("unusable as hash key: %s", key.Type())
+			return newError("On line %d, unusable as hash key: %s", node.Token.Line, key.Type())
 		}
 
 		value := Eval(valueNode, env)

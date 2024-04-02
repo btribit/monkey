@@ -1,12 +1,15 @@
 package lexer
 
-import "monkey/token"
+import (
+	"monkey/token"
+)
 
 type Lexer struct {
 	input        string
 	position     int
 	readPosition int
 	ch           byte
+	line         int
 }
 
 func New(input string) *Lexer {
@@ -99,6 +102,8 @@ func (l *Lexer) NextToken() token.Token {
 		}
 	}
 
+	tok.Line = l.line
+
 	l.readChar()
 	return tok
 }
@@ -124,6 +129,9 @@ func (l *Lexer) peekCharacter() byte { // peekCharacter is a helper function
 
 func (l *Lexer) skipWhitespace() { // skipWhitespace is a helper function
 	for l.ch == ' ' || l.ch == '\t' || l.ch == '\n' || l.ch == '\r' {
+		if l.ch == '\n' {
+			l.line++
+		}
 		l.readChar()
 	}
 }

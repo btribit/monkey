@@ -15,7 +15,7 @@ func TestEvalImportLiteral(t *testing.T) {
 		expected int64
 	}{
 		// Import literals
-		{`import "../test.mky"; test(5);`, 5},
+		{`import "../helper.mky"; test(5);`, 5},
 	}
 
 	for _, tt := range tests {

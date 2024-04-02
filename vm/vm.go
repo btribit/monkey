@@ -588,14 +588,13 @@ func (vm *VM) executeBinaryTensorOperation(op code.Opcode, left, right object.Ob
 	leftShape := left.(*object.Tensor).Shape
 	rightShape := right.(*object.Tensor).Shape
 
-	if !shapesEqual(leftShape, rightShape) {
-		return fmt.Errorf("shapes are not equal %+v %+v", leftShape, rightShape)
-	}
-
 	var resultData []float64
 
 	switch op {
 	case code.OpAdd:
+		if !shapesEqual(leftShape, rightShape) {
+			return fmt.Errorf("shapes are not equal %+v %+v", leftShape, rightShape)
+		}
 		for index := range left.(*object.Tensor).Data {
 			resultData = append(resultData, left.(*object.Tensor).Data[index]+right.(*object.Tensor).Data[index])
 		}
