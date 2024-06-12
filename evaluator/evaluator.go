@@ -141,12 +141,25 @@ func evalTensorLiteral(node *ast.TensorLiteral, env *object.Environment) object.
 	}
 
 	for _, element := range data.(*object.Array).Elements {
+		// If element is an integer convert to float
+		if element.Type() == object.INTEGER_OBJ {
+			dataElements = append(dataElements, float64(element.(*object.Integer).Value))
+			continue
+		}
+		// If element is not a float return an error
+		if element.Type() != object.FLOAT_OBJ {
+			return newError("On line %d, tensor data must be of type float", node.Token.Line)
+		}
 		dataElements = append(dataElements, element.(*object.Float).Value)
 	}
 
 	shape := Eval(node.Shape, env).(*object.Array)
 
 	for _, element := range shape.Elements {
+		// tensor shape must be of type integer
+		if element.Type() != object.INTEGER_OBJ {
+			return newError("On line %d, tensor shape must be of type integer", node.Token.Line)
+		}
 		shapeElements = append(shapeElements, element.(*object.Integer).Value)
 	}
 

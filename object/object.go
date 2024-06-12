@@ -158,11 +158,11 @@ func (t *Tensor) Inspect() string {
 		data = append(data, fmt.Sprintf("%f", d))
 	}
 
-	out.WriteString("tensor([")
+	out.WriteString("@[")
 	out.WriteString(strings.Join(shape, ", "))
 	out.WriteString("], [")
 	out.WriteString(strings.Join(data, ", "))
-	out.WriteString("])")
+	out.WriteString("]")
 
 	return out.String()
 }

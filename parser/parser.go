@@ -77,10 +77,10 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.IF, p.parseIfExpression)            // Register the parseIfExpression function
 	p.registerPrefix(token.FUNCTION, p.parseFunctionLiteral)   // Register the parseFunctionLiteral function
 	p.registerPrefix(token.IMPORT, p.parseImportLiteral)       // Register the parseImportExpression function
-	p.registerPrefix(token.TENSOR, p.parseTensorLiteral)       // Register the parseTensorLiteral function
 	p.registerPrefix(token.STRING, p.parseStringLiteral)       // Register the parseStringLiteral function
 	p.registerPrefix(token.LBRACKET, p.parseArrayLiteral)      // Register the parseArrayLiteral function
 	p.registerPrefix(token.LBRACE, p.parseHashLiteral)         // Register the parseHashLiteral function
+	p.registerPrefix(token.AT, p.parseTensorLiteral)           // Register the parseTensorLiteral function
 
 	p.infixParseFns = make(map[token.TokenType]infixParseFn) // Initialize the infixParseFns
 	p.registerInfix(token.PLUS, p.parseInfixExpression)      // Register the parseInfixExpression function
@@ -258,11 +258,11 @@ func (p *Parser) parseCallArguments() []ast.Expression {
 func (p *Parser) parseTensorLiteral() ast.Expression {
 	lit := &ast.TensorLiteral{Token: p.currentToken} // create a new Tensor literal
 
-	if !p.expectPeek(token.LPAREN) {
+	if !p.expectPeek(token.LBRACKET) {
 		return nil
 	}
 	// Move to the shape list/array
-	p.nextToken()
+	//p.nextToken()
 
 	// Parse the shape - assuming parseArrayLiteral can handle general list/array parsing
 	shape := p.parseExpression(LOWEST)
@@ -284,10 +284,6 @@ func (p *Parser) parseTensorLiteral() ast.Expression {
 		return nil
 	}
 	lit.Data = data
-
-	if !p.expectPeek(token.RPAREN) {
-		return nil
-	}
 
 	return lit
 }

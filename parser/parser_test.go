@@ -1013,7 +1013,7 @@ func TestFloatLiteralExpression(t *testing.T) {
 
 // TestTensorLiteralExpression
 func TestTensorLiteralExpression(t *testing.T) {
-	input := "tensor([3,3],[1,2,3,4,5,6,7,8,9])"
+	input := "@[3,3],[1,2,3,4,5,6,7,8,9]"
 
 	l := lexer.New(input)
 	p := New(l)

@@ -298,10 +298,23 @@ func createTensor(shape object.Object, data object.Object) (object.Object, error
 	}
 
 	for _, element := range dataArray.Elements {
+		// Convert integer to type float
+		if element.Type() == object.INTEGER_OBJ {
+			dataElements = append(dataElements, float64(element.(*object.Integer).Value))
+			continue
+		}
+		// Check to be sure element is type float
+		if element.Type() != object.FLOAT_OBJ {
+			return nil, fmt.Errorf("data elements must be of type float")
+		}
 		dataElements = append(dataElements, element.(*object.Float).Value)
 	}
 
 	for _, element := range shapeArray.Elements {
+		// tensor shape must be an array of integers
+		if element.Type() != object.INTEGER_OBJ {
+			return nil, fmt.Errorf("shape elements must be of type integer")
+		}
 		shapeElements = append(shapeElements, element.(*object.Integer).Value)
 	}
 

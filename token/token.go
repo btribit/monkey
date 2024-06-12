@@ -38,6 +38,7 @@ const (
 
 	LBRACKET = "["
 	RBRACKET = "]"
+	AT       = "@"
 
 	// Keywords
 	FUNCTION = "FUNCTION"
@@ -48,7 +49,6 @@ const (
 	IF       = "IF"
 	ELSE     = "ELSE"
 	RETURN   = "RETURN"
-	TENSOR   = "TENSOR"
 
 	// Comparison operators
 	LT     = "<"
@@ -66,7 +66,6 @@ var keywords = map[string]TokenType{
 	"if":     IF,
 	"else":   ELSE,
 	"return": RETURN,
-	"tensor": TENSOR,
 }
 
 // LookupIdent checks the keywords table to see whether the given identifier is
