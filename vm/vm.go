@@ -9,9 +9,9 @@ import (
 	"monkey/object"
 )
 
-const StackeSize = 2048
+const StackeSize = 8192
 const GlobalsSize = 65536
-const MaxFrames = 1024
+const MaxFrames = 4096
 
 var True = &object.Boolean{Value: true}
 var False = &object.Boolean{Value: false}

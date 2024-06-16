@@ -360,7 +360,7 @@ func TestBuiltinFunctions(t *testing.T) {
 
 // TestTensorLiteral
 func TestTensorLiteral(t *testing.T) {
-	input := "tensor([3,3],[1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0]);"
+	input := "@[3,3],[1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0];"
 	evaluated := testEval(input)
 	_, ok := evaluated.(*object.Tensor)
 	if !ok {
@@ -466,19 +466,19 @@ func TestTensorMath(t *testing.T) {
 		expected interface{}
 	}{
 		{
-			input:    `let a = tensor([3],[1.0,2.0,3.0]); let b = tensor([3],[1.0,2.0,3.0]); let c = a + b; c;`,
+			input:    `let a = @[3],[1.0,2.0,3.0]; let b = @[3],[1.0,2.0,3.0]; let c = a + b; c;`,
 			expected: object.Tensor{Shape: []int64{3}, Data: []float64{2.0, 4.0, 6.0}},
 		},
 		{
-			input:    `let d = tensor([3],[1.0,2.0,3.0]); let e = tensor([3],[1.0,2.0,3.0]); let f = d - e; f;`,
+			input:    `let d = @[3],[1.0,2.0,3.0]; let e = @[3],[1.0,2.0,3.0]; let f = d - e; f;`,
 			expected: object.Tensor{Shape: []int64{3}, Data: []float64{0.0, 0.0, 0.0}},
 		},
 		{
-			input:    `let x = tensor([3],[1.0,2.0,3.0]); let y = tensor([3],[1.0,4.0,9.0]); let z = x * y; z;`,
+			input:    `let x = @[3],[1.0,2.0,3.0]; let y = @[3],[1.0,4.0,9.0]; let z = x * y; z;`,
 			expected: object.Tensor{Shape: []int64{3}, Data: []float64{1.0, 8.0, 27.0}},
 		},
 		{
-			input:    `let x = tensor([3],[1.0,2.0,3.0]); let y = tensor([3],[1.0,1.0,1.0]); let z = x / y; z;`,
+			input:    `let x = @[3],[1.0,2.0,3.0]; let y = @[3],[1.0,1.0,1.0]; let z = x / y; z;`,
 			expected: object.Tensor{Shape: []int64{3}, Data: []float64{1.0, 2.0, 3.0}},
 		},
 	}

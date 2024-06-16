@@ -23,11 +23,11 @@ let map = fn(arr, func) {
     return iter(arr, [], func);
 };
 
-let weights_input_hidden = tensor([2, 2], fillArray([],4)); 
-let weights_hidden_output = tensor([2, 1], fillArray([],2));
+let weights_input_hidden = @[2, 2], fillArray([],4); 
+let weights_hidden_output = @[2, 1], fillArray([],2);
 
-let bias_hidden = tensor([2], fillArray([],2));
-let bias_output = tensor([1], fillArray([],1));
+let bias_hidden = @[2], fillArray([],2);
+let bias_output = @[1], fillArray([],1);
 
 let forward_pass = fn(input) {
     let hidden_input = (input * weights_input_hidden) + bias_hidden;

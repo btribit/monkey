@@ -1,0 +1,5 @@
+import "helper.mky";
+
+let y = test("Hello, World!");
+
+puts(y);

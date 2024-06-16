@@ -270,6 +270,12 @@ func applyFunction(fn object.Object, args []object.Object) object.Object {
 		evaluated := Eval(function.Body, extendedEnv)
 		return unwrapReturnValue(evaluated)
 
+	case *object.Extended:
+		if result := function.Fn(args...); result != nil {
+			return result
+		}
+		return NULL
+
 	case *object.Builtin:
 		if result := function.Fn(args...); result != nil {
 			return result
@@ -661,6 +667,9 @@ func evalIdentifier(node *ast.Identifier, env *object.Environment) object.Object
 	}
 	if builtin, ok := builtins[node.Value]; ok {
 		return builtin
+	}
+	if extended, ok := object.GetExtendedFunction(node.Value); ok {
+		return &extended
 	}
 
 	return newError("identifier not found: " + node.Value)

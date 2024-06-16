@@ -331,7 +331,11 @@ func (c *compiler) Compile(node ast.Node) error {
 		p := parser.New(l)
 
 		program := p.ParseProgram()
-		c.Compile(program)
+		err = c.Compile(program)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Woops! Compilation failed on import of %s:\n %s\n", node.Path, err)
+			return err
+		}
 		c.emit(code.OpImport, c.addConstant(&object.String{Value: node.Path}))
 	case *ast.TensorLiteral:
 		err := c.Compile(node.Shape)

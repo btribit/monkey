@@ -23,6 +23,7 @@ const (
 	IMPORT_OBJ            = "IMPORT"
 	COMPILED_FUNCTION_OBJ = "COMPILED_FUNCTION"
 	BUILTIN_OBJ           = "BUILTIN"
+	EXTENDED_OBJ          = "EXTENDED"
 	ARRAY_OBJ             = "ARRAY"
 	HASH_OBJ              = "HASH"
 	CLOSURE_OBJ           = "CLOSURE"
@@ -126,6 +127,13 @@ func (f *Function) Inspect() string {
 
 	return out.String()
 }
+
+type Extended struct {
+	Fn func(args ...Object) Object
+}
+
+func (e *Extended) Type() ObjectType { return EXTENDED_OBJ }
+func (e *Extended) Inspect() string  { return "extended function" }
 
 type BuiltInFunction func(args ...Object) Object
 
