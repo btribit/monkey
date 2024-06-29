@@ -6,8 +6,7 @@ import (
 )
 
 func Hello(args ...object.Object) object.Object {
-	var value string
-	value = "Hello, World!"
+	value := "Hello, World!"
 	if len(args) > 2 || len(args) < 1 {
 		return &object.String{Value: "not enough arguments"}
 	}
